@@ -10,6 +10,9 @@ import Debts from '@/pages/Debts'
 import CreditCards from '@/pages/CreditCards'
 import Budgets from '@/pages/Budgets'
 import SavingsGoals from '@/pages/SavingsGoals'
+import Receivables from '@/pages/Receivables'
+import Documents from '@/pages/Documents'
+import FinancialMemoryPage from '@/pages/FinancialMemory'
 
 export default function App() {
   return (
@@ -26,6 +29,9 @@ export default function App() {
           <Route path="/tarjetas" element={<CreditCards />} />
           <Route path="/presupuestos" element={<Budgets />} />
           <Route path="/metas" element={<SavingsGoals />} />
+          <Route path="/me-deben" element={<Receivables />} />
+          <Route path="/documentos" element={<Documents />} />
+          <Route path="/memoria" element={<FinancialMemoryPage />} />
         </Route>
       </Route>
     </Routes>

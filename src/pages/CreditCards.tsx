@@ -6,7 +6,7 @@ export default function CreditCards() {
     <EntityCrud<CreditCard>
       table="credit_cards"
       title="Tarjetas de crédito"
-      description="Tus tarjetas y su saldo actual."
+      description="Tus tarjetas y su saldo actual. Deja el saldo vacío si aún no lo confirmas."
       orderBy="created_at"
       labelField="name"
       amountField="current_balance"
@@ -15,7 +15,7 @@ export default function CreditCards() {
         { name: 'name', label: 'Nombre', type: 'text', required: true },
         { name: 'issuer', label: 'Emisor', type: 'text' },
         { name: 'credit_limit', label: 'Límite', type: 'number', required: true },
-        { name: 'current_balance', label: 'Saldo actual', type: 'number', required: true },
+        { name: 'current_balance', label: 'Saldo actual (vacío = por confirmar)', type: 'number' },
       ]}
     />
   )

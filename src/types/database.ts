@@ -30,11 +30,19 @@ export interface Account {
   updated_at: ISODateTime
 }
 
+export type DataStatus = 'actual' | 'historico' | 'desactualizado' | 'confirmado' | 'por_confirmar'
+export type IncomeSourceType = 'fijo' | 'variable' | 'extraordinario' | 'destinado_especifico'
+export type IncomeFrequency = 'semanal' | 'quincenal' | 'mensual' | 'irregular'
+
 export interface IncomeSource {
   id: UUID
   user_id: UUID
   name: string
   is_recurring: boolean
+  source_type: IncomeSourceType
+  frequency: IncomeFrequency | null
+  earmarked_for: string | null
+  status: DataStatus
   created_at: ISODateTime
   updated_at: ISODateTime
 }
@@ -97,12 +105,16 @@ export interface Debt {
   user_id: UUID
   name: string
   creditor: string | null
-  original_amount: number
-  current_balance: number
+  /** null = unknown/unconfirmed ("por confirmar") — never treat as 0. */
+  original_amount: number | null
+  /** null = unknown/unconfirmed ("por confirmar") — never treat as 0. */
+  current_balance: number | null
   interest_rate: number
   minimum_payment: number | null
   due_day: number | null
+  currency: string
   status: DebtStatus
+  status_detail: DataStatus
   created_at: ISODateTime
   updated_at: ISODateTime
 }
@@ -124,10 +136,13 @@ export interface CreditCard {
   issuer: string | null
   last_four: string | null
   credit_limit: number
-  current_balance: number
+  /** null = unknown/unconfirmed ("por confirmar") — never treat as 0. */
+  current_balance: number | null
   statement_day: number | null
   payment_due_day: number | null
   interest_rate: number
+  currency: string
+  status_detail: DataStatus
   created_at: ISODateTime
   updated_at: ISODateTime
 }
@@ -156,6 +171,8 @@ export interface Receivable {
   outstanding_amount: number
   due_date: ISODate | null
   status: ReceivableStatus
+  currency: string
+  status_detail: DataStatus
   notes: string | null
   created_at: ISODateTime
   updated_at: ISODateTime
@@ -267,6 +284,9 @@ export interface FinancialMemory {
   memory_value: Record<string, unknown>
   confidence: number
   source: string
+  status: DataStatus
+  effective_date: ISODate
+  superseded_by: UUID | null
   created_at: ISODateTime
   updated_at: ISODateTime
 }

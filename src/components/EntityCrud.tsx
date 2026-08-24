@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useSupabaseTable } from '@/hooks/useSupabaseTable'
+import { UnknownAmount } from '@/components/StatusBadge'
 import { formatCurrency, formatDate, todayISODate } from '@/utils/format'
 
 export interface EntityField {
@@ -56,7 +57,12 @@ export function EntityCrud<T extends { id: string }>({
     const payload: Record<string, unknown> = {}
     for (const field of fields) {
       const raw = values[field.name]
-      payload[field.name] = field.type === 'number' ? Number(raw) : raw || null
+      if (field.type === 'number') {
+        // Blank stays null ("por confirmar"/unknown) — never silently becomes 0.
+        payload[field.name] = raw === '' ? null : Number(raw)
+      } else {
+        payload[field.name] = raw || null
+      }
     }
     const result = await create(payload as Partial<T>)
     setSubmitting(false)
@@ -121,11 +127,14 @@ export function EntityCrud<T extends { id: string }>({
                   )}
                 </div>
                 <div className="flex items-center gap-3">
-                  {amountField && (
-                    <span className={amountTone === 'positive' ? 'text-brand-600' : 'text-red-600'}>
-                      {formatCurrency(Number(item[amountField]))}
-                    </span>
-                  )}
+                  {amountField &&
+                    (item[amountField] === null || item[amountField] === undefined ? (
+                      <UnknownAmount />
+                    ) : (
+                      <span className={amountTone === 'positive' ? 'text-brand-600' : 'text-red-600'}>
+                        {formatCurrency(Number(item[amountField]))}
+                      </span>
+                    ))}
                   <button
                     type="button"
                     onClick={() => remove(item.id)}

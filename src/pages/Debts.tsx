@@ -6,7 +6,7 @@ export default function Debts() {
     <EntityCrud<Debt>
       table="debts"
       title="Deudas"
-      description="Préstamos y obligaciones pendientes."
+      description="Préstamos y obligaciones pendientes. Deja el saldo vacío si aún no lo confirmas."
       orderBy="created_at"
       labelField="name"
       amountField="current_balance"
@@ -14,8 +14,8 @@ export default function Debts() {
       fields={[
         { name: 'name', label: 'Nombre', type: 'text', required: true },
         { name: 'creditor', label: 'Acreedor', type: 'text' },
-        { name: 'original_amount', label: 'Monto original', type: 'number', required: true },
-        { name: 'current_balance', label: 'Saldo actual', type: 'number', required: true },
+        { name: 'original_amount', label: 'Monto original (vacío = por confirmar)', type: 'number' },
+        { name: 'current_balance', label: 'Saldo actual (vacío = por confirmar)', type: 'number' },
       ]}
     />
   )
