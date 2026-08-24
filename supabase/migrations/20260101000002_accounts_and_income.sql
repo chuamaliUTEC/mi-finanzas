@@ -1,7 +1,7 @@
 -- ============================================================
 -- accounts: bank accounts / cash / wallets owned by a user
 -- ============================================================
-create table public.accounts (
+create table if not exists public.accounts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
@@ -13,12 +13,14 @@ create table public.accounts (
   updated_at timestamptz not null default now()
 );
 
-create index accounts_user_id_idx on public.accounts(user_id);
+create index if not exists accounts_user_id_idx on public.accounts(user_id);
 
 alter table public.accounts enable row level security;
+drop policy if exists "accounts_all_own" on public.accounts;
 create policy "accounts_all_own" on public.accounts
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+drop trigger if exists set_accounts_updated_at on public.accounts;
 create trigger set_accounts_updated_at
   before update on public.accounts
   for each row execute function public.set_updated_at();
@@ -26,7 +28,7 @@ create trigger set_accounts_updated_at
 -- ============================================================
 -- income_sources: e.g. "Sueldo", "Freelance", "Alquiler"
 -- ============================================================
-create table public.income_sources (
+create table if not exists public.income_sources (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
@@ -35,12 +37,14 @@ create table public.income_sources (
   updated_at timestamptz not null default now()
 );
 
-create index income_sources_user_id_idx on public.income_sources(user_id);
+create index if not exists income_sources_user_id_idx on public.income_sources(user_id);
 
 alter table public.income_sources enable row level security;
+drop policy if exists "income_sources_all_own" on public.income_sources;
 create policy "income_sources_all_own" on public.income_sources
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+drop trigger if exists set_income_sources_updated_at on public.income_sources;
 create trigger set_income_sources_updated_at
   before update on public.income_sources
   for each row execute function public.set_updated_at();
@@ -48,7 +52,7 @@ create trigger set_income_sources_updated_at
 -- ============================================================
 -- income_transactions: individual income entries
 -- ============================================================
-create table public.income_transactions (
+create table if not exists public.income_transactions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   account_id uuid references public.accounts(id) on delete set null,
@@ -61,13 +65,15 @@ create table public.income_transactions (
   updated_at timestamptz not null default now()
 );
 
-create index income_transactions_user_id_idx on public.income_transactions(user_id);
-create index income_transactions_received_at_idx on public.income_transactions(received_at);
+create index if not exists income_transactions_user_id_idx on public.income_transactions(user_id);
+create index if not exists income_transactions_received_at_idx on public.income_transactions(received_at);
 
 alter table public.income_transactions enable row level security;
+drop policy if exists "income_transactions_all_own" on public.income_transactions;
 create policy "income_transactions_all_own" on public.income_transactions
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+drop trigger if exists set_income_transactions_updated_at on public.income_transactions;
 create trigger set_income_transactions_updated_at
   before update on public.income_transactions
   for each row execute function public.set_updated_at();

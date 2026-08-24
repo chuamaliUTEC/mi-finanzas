@@ -1,7 +1,7 @@
 -- ============================================================
 -- debts: loans / obligations owed by the user
 -- ============================================================
-create table public.debts (
+create table if not exists public.debts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
@@ -16,12 +16,14 @@ create table public.debts (
   updated_at timestamptz not null default now()
 );
 
-create index debts_user_id_idx on public.debts(user_id);
+create index if not exists debts_user_id_idx on public.debts(user_id);
 
 alter table public.debts enable row level security;
+drop policy if exists "debts_all_own" on public.debts;
 create policy "debts_all_own" on public.debts
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+drop trigger if exists set_debts_updated_at on public.debts;
 create trigger set_debts_updated_at
   before update on public.debts
   for each row execute function public.set_updated_at();
@@ -29,7 +31,7 @@ create trigger set_debts_updated_at
 -- ============================================================
 -- debt_payments: payments made against a debt
 -- ============================================================
-create table public.debt_payments (
+create table if not exists public.debt_payments (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   debt_id uuid not null references public.debts(id) on delete cascade,
@@ -39,17 +41,18 @@ create table public.debt_payments (
   created_at timestamptz not null default now()
 );
 
-create index debt_payments_user_id_idx on public.debt_payments(user_id);
-create index debt_payments_debt_id_idx on public.debt_payments(debt_id);
+create index if not exists debt_payments_user_id_idx on public.debt_payments(user_id);
+create index if not exists debt_payments_debt_id_idx on public.debt_payments(debt_id);
 
 alter table public.debt_payments enable row level security;
+drop policy if exists "debt_payments_all_own" on public.debt_payments;
 create policy "debt_payments_all_own" on public.debt_payments
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 -- ============================================================
 -- credit_cards
 -- ============================================================
-create table public.credit_cards (
+create table if not exists public.credit_cards (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
@@ -64,12 +67,14 @@ create table public.credit_cards (
   updated_at timestamptz not null default now()
 );
 
-create index credit_cards_user_id_idx on public.credit_cards(user_id);
+create index if not exists credit_cards_user_id_idx on public.credit_cards(user_id);
 
 alter table public.credit_cards enable row level security;
+drop policy if exists "credit_cards_all_own" on public.credit_cards;
 create policy "credit_cards_all_own" on public.credit_cards
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+drop trigger if exists set_credit_cards_updated_at on public.credit_cards;
 create trigger set_credit_cards_updated_at
   before update on public.credit_cards
   for each row execute function public.set_updated_at();
@@ -77,7 +82,7 @@ create trigger set_credit_cards_updated_at
 -- ============================================================
 -- credit_card_transactions
 -- ============================================================
-create table public.credit_card_transactions (
+create table if not exists public.credit_card_transactions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   credit_card_id uuid not null references public.credit_cards(id) on delete cascade,
@@ -89,9 +94,10 @@ create table public.credit_card_transactions (
   created_at timestamptz not null default now()
 );
 
-create index credit_card_transactions_user_id_idx on public.credit_card_transactions(user_id);
-create index credit_card_transactions_card_id_idx on public.credit_card_transactions(credit_card_id);
+create index if not exists credit_card_transactions_user_id_idx on public.credit_card_transactions(user_id);
+create index if not exists credit_card_transactions_card_id_idx on public.credit_card_transactions(credit_card_id);
 
 alter table public.credit_card_transactions enable row level security;
+drop policy if exists "credit_card_transactions_all_own" on public.credit_card_transactions;
 create policy "credit_card_transactions_all_own" on public.credit_card_transactions
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

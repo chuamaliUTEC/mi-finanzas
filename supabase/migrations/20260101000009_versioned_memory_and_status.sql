@@ -2,13 +2,18 @@
 -- data_status: shared vocabulary for "how current is this value?"
 -- Used across tables that can hold uncertain or superseded data.
 -- ============================================================
-create type public.data_status as enum (
-  'actual',
-  'historico',
-  'desactualizado',
-  'confirmado',
-  'por_confirmar'
-);
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'data_status') then
+    create type public.data_status as enum (
+      'actual',
+      'historico',
+      'desactualizado',
+      'confirmado',
+      'por_confirmar'
+    );
+  end if;
+end $$;
 
 -- ============================================================
 -- financial_memory: rebuilt to be append-only / versioned.
