@@ -79,23 +79,54 @@ bucket privado `user-files` de Supabase Storage, particionado por `user_id`.
 - ✅ Registro / inicio de sesión / cierre de sesión vía Supabase Auth
 - ✅ Rutas protegidas: sin sesión, redirige a `/login`
 - ✅ Persistencia real en PostgreSQL para Ingresos, Gastos, Deudas, Tarjetas
-  de crédito, Presupuestos mensuales y Metas de ahorro (crear, listar,
-  eliminar), disponible en cualquier dispositivo apenas se inicia sesión
-- ✅ Dashboard con totales de ingresos/gastos/balance y movimientos recientes
-- ✅ Diseño responsive (móvil, tablet, escritorio)
-- ✅ Módulos de `algorithms/` con lógica financiera real pero simple
-  (promedio móvil para forecasting, snowball/avalanche para deudas,
-  progreso de metas, varianza de presupuesto, recomendaciones basadas en
-  reglas, memoria clave/valor) — sin IA compleja, tal como se pidió
+  de crédito, Cuentas por cobrar, Presupuestos mensuales y Metas de ahorro
+  (crear, listar, eliminar), disponible en cualquier dispositivo apenas se
+  inicia sesión
+- ✅ **Memoria financiera versionada**: registrar un nuevo hecho nunca borra
+  el anterior (pasa a "histórico" automáticamente vía trigger). "Por
+  confirmar" es un estado real (`NULL`), nunca se asume `S/.0`
+- ✅ Dashboard con patrimonio neto, liquidez desglosada (disponible /
+  comprometido / reservado / invertido / por cobrar), "¿cuánto puedo
+  gastar?" y movimientos recientes
+- ✅ Documentos: subida real a Supabase Storage con metadata en Postgres
+- ✅ Sobres (envelope budgeting) por categoría de gasto, contra el
+  presupuesto del mes
+- ✅ Calculadoras dedicadas de 🏠 Departamento (contado/hipoteca/aumentar
+  cuota/postergar) y 👵 Retiro (valor nominal vs. real ajustado por
+  inflación), con supuestos guardados como memoria versionada
+- ✅ Forecast a 12 meses (promedio móvil) + comparación forecast vs. real
+  con error absoluto/porcentual
+- ✅ 🔎 Auditor: gastos anormales (outliers por categoría), duplicados,
+  presupuesto excedido, gastos recurrentes vencidos, metas atrasadas,
+  deuda nueva — cada hallazgo se puede guardar como `financial_alerts`
+- ✅ 📈 Aprendizaje: sugiere ajustes de presupuesto según tu historial real,
+  nunca los aplica solo — requiere tu aprobación explícita
+  (`learning_adjustments`)
+- ✅ 💡 Recomendaciones con explicabilidad (motivo, datos usados, impacto,
+  confianza), guardables en `recommendation_history`
+- ✅ 🔮 Simulador "¿qué pasaría si...?" interactivo sobre deuda, departamento
+  y retiro
+- ✅ 📅 Calendario financiero del mes (ingresos, gastos, vencimientos,
+  metas, cobros esperados)
+- ✅ Diseño responsive lila/púrpura (móvil, tablet, escritorio) con nav
+  inferior en móvil
+- ✅ Módulos de `algorithms/` con lógica financiera real pero simple (sin
+  IA compleja, tal como se pidió): forecasting, debt (snowball/avalanche),
+  savings, budgeting, networth, goals (departamento/retiro), audit,
+  learning, recommendations, memory
 - ✅ `audit_logs` con helper para registrar acciones
 
 ## Próximas fases (no implementadas todavía)
 
 - Edición inline de registros existentes (hoy: crear y eliminar)
 - Pagos parciales de deudas/tarjetas/cuentas por cobrar como flujos dedicados
-- Carga de archivos (recibos, estados de cuenta) contra el bucket `user-files`
-- Alertas automáticas (`financial_alerts`) disparadas por triggers o jobs
+- OCR / lectura automática de documentos subidos (la arquitectura está
+  lista — `uploaded_files` vinculable a cualquier registro — pero no hay
+  extracción automática todavía)
+- Alertas automáticas (`financial_alerts`) disparadas por triggers o jobs,
+  hoy se generan bajo demanda desde el Auditor
 - Snapshots periódicos (`financial_snapshots`) vía cron/Edge Function
+- Vista de calendario en formato grilla (hoy es una agenda cronológica)
 - Despliegue continuo (Vercel/Netlify + Supabase) — este repo está listo para
   desplegarse en cualquiera de esas plataformas, pero el despliegue en sí no
   se ha ejecutado desde este entorno

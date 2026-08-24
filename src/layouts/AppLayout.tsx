@@ -20,7 +20,7 @@ export function AppLayout() {
   return (
     <div className="min-h-screen bg-gray-50 md:flex">
       {/* Sidebar: desktop only */}
-      <aside className="hidden w-56 shrink-0 border-r border-gray-200 bg-white md:block">
+      <aside className="hidden w-56 shrink-0 border-r border-gray-200 bg-white md:sticky md:top-0 md:block md:h-screen md:overflow-y-auto">
         <div className="p-4">
           <h1 className="text-lg font-semibold text-brand-700">💜 Mi Finanzas</h1>
         </div>
@@ -75,7 +75,7 @@ export function AppLayout() {
       </nav>
 
       {moreOpen && (
-        <div className="fixed inset-x-0 bottom-14 z-20 border-t border-gray-200 bg-white p-2 shadow-lg md:hidden">
+        <div className="fixed inset-x-0 bottom-14 z-20 max-h-[70vh] overflow-y-auto border-t border-gray-200 bg-white p-2 shadow-lg md:hidden">
           <div className="grid grid-cols-3 gap-1">
             {MOBILE_MORE_ITEMS.map((item) => (
               <NavLink

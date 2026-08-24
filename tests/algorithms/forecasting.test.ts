@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { movingAverageForecast, projectNextPeriod } from '@/algorithms/forecasting'
+import { calculateForecastError, movingAverageForecast, projectNext12Months, projectNextPeriod } from '@/algorithms/forecasting'
 
 describe('movingAverageForecast', () => {
   it('returns 0 for empty history', () => {
@@ -25,5 +25,30 @@ describe('projectNextPeriod', () => {
     expect(result.projectedIncome).toBe(1000)
     expect(result.projectedExpenses).toBe(500)
     expect(result.projectedBalance).toBe(500)
+  })
+})
+
+describe('projectNext12Months', () => {
+  it('repeats the same moving-average projection for 12 months, numbered 1-12', () => {
+    const income = [{ amount: 1000 }]
+    const expenses = [{ amount: 400 }]
+    const result = projectNext12Months(income, expenses)
+    expect(result).toHaveLength(12)
+    expect(result[0].monthOffset).toBe(1)
+    expect(result[11].monthOffset).toBe(12)
+    expect(result.every((m) => m.projectedIncome === 1000)).toBe(true)
+  })
+})
+
+describe('calculateForecastError', () => {
+  it('computes absolute and percent error', () => {
+    const result = calculateForecastError(500, 600)
+    expect(result.absoluteError).toBe(100)
+    expect(result.percentError).toBe(20)
+  })
+
+  it('returns null percent error when forecast is 0', () => {
+    const result = calculateForecastError(0, 100)
+    expect(result.percentError).toBeNull()
   })
 })

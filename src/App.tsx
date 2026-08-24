@@ -13,6 +13,15 @@ import SavingsGoals from '@/pages/SavingsGoals'
 import Receivables from '@/pages/Receivables'
 import Documents from '@/pages/Documents'
 import FinancialMemoryPage from '@/pages/FinancialMemory'
+import Envelopes from '@/pages/Envelopes'
+import Departamento from '@/pages/Departamento'
+import Retiro from '@/pages/Retiro'
+import ForecastPage from '@/pages/Forecast'
+import Auditor from '@/pages/Auditor'
+import Learning from '@/pages/Learning'
+import Recommendations from '@/pages/Recommendations'
+import Simulator from '@/pages/Simulator'
+import CalendarPage from '@/pages/Calendar'
 
 export default function App() {
   return (
@@ -32,6 +41,15 @@ export default function App() {
           <Route path="/me-deben" element={<Receivables />} />
           <Route path="/documentos" element={<Documents />} />
           <Route path="/memoria" element={<FinancialMemoryPage />} />
+          <Route path="/sobres" element={<Envelopes />} />
+          <Route path="/departamento" element={<Departamento />} />
+          <Route path="/retiro" element={<Retiro />} />
+          <Route path="/forecast" element={<ForecastPage />} />
+          <Route path="/auditor" element={<Auditor />} />
+          <Route path="/aprendizaje" element={<Learning />} />
+          <Route path="/recomendaciones" element={<Recommendations />} />
+          <Route path="/simulador" element={<Simulator />} />
+          <Route path="/calendario" element={<CalendarPage />} />
         </Route>
       </Route>
     </Routes>
