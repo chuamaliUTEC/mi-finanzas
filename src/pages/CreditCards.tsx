@@ -14,7 +14,7 @@ export default function CreditCards() {
       fields={[
         { name: 'name', label: 'Nombre', type: 'text', required: true },
         { name: 'issuer', label: 'Emisor', type: 'text' },
-        { name: 'credit_limit', label: 'Límite', type: 'number', required: true },
+        { name: 'credit_limit', label: 'Límite (vacío = por confirmar)', type: 'number' },
         { name: 'current_balance', label: 'Saldo actual (vacío = por confirmar)', type: 'number' },
       ]}
     />

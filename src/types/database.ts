@@ -135,7 +135,8 @@ export interface CreditCard {
   name: string
   issuer: string | null
   last_four: string | null
-  credit_limit: number
+  /** null = unknown/unconfirmed ("por confirmar") — never treat as 0. */
+  credit_limit: number | null
   /** null = unknown/unconfirmed ("por confirmar") — never treat as 0. */
   current_balance: number | null
   statement_day: number | null
