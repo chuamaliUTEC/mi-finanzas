@@ -4,28 +4,74 @@ export interface NavItem {
   icon: string
 }
 
-/** Full navigation, shown in the desktop sidebar. */
-export const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', path: '/', icon: '🏠' },
-  { label: 'Ingresos', path: '/ingresos', icon: '💵' },
-  { label: 'Gastos', path: '/gastos', icon: '💸' },
-  { label: 'Deudas', path: '/deudas', icon: '💳' },
-  { label: 'Tarjetas', path: '/tarjetas', icon: '💳' },
-  { label: 'Me deben', path: '/me-deben', icon: '💰' },
-  { label: 'Presupuestos', path: '/presupuestos', icon: '📊' },
-  { label: 'Sobres', path: '/sobres', icon: '✉️' },
-  { label: 'Metas', path: '/metas', icon: '🎯' },
-  { label: 'Departamento', path: '/departamento', icon: '🏠' },
-  { label: 'Retiro', path: '/retiro', icon: '👵' },
-  { label: 'Forecast', path: '/forecast', icon: '🔮' },
-  { label: 'Auditor', path: '/auditor', icon: '🔎' },
-  { label: 'Aprendizaje', path: '/aprendizaje', icon: '📈' },
-  { label: 'Recomendaciones', path: '/recomendaciones', icon: '💡' },
-  { label: 'Simulador', path: '/simulador', icon: '🔮' },
-  { label: 'Calendario', path: '/calendario', icon: '📅' },
-  { label: 'Documentos', path: '/documentos', icon: '📁' },
-  { label: 'Memoria financiera', path: '/memoria', icon: '🧠' },
+export interface NavGroup {
+  label: string
+  icon: string
+  /** If set, the group itself is a single link (no sub-items shown). */
+  path?: string
+  items?: NavItem[]
+}
+
+/** Full navigation, grouped by the "¿Cómo estoy? / ¿Qué pasó? / ..." mental model. */
+export const NAV_GROUPS: NavGroup[] = [
+  { label: 'Dashboard', icon: '🏠', path: '/' },
+  {
+    label: 'Operación',
+    icon: '💸',
+    items: [
+      { label: 'Ingresos', path: '/ingresos', icon: '💵' },
+      { label: 'Gastos', path: '/gastos', icon: '💸' },
+      { label: 'Cuentas', path: '/cuentas', icon: '🏦' },
+      { label: 'Deudas', path: '/deudas', icon: '💳' },
+      { label: 'Tarjetas', path: '/tarjetas', icon: '💳' },
+      { label: 'Me deben', path: '/me-deben', icon: '💰' },
+    ],
+  },
+  {
+    label: 'Análisis',
+    icon: '📊',
+    items: [
+      { label: 'Análisis', path: '/analisis', icon: '📊' },
+      { label: 'Forecast', path: '/forecast', icon: '🔮' },
+    ],
+  },
+  {
+    label: 'Planificación',
+    icon: '🎯',
+    items: [
+      { label: 'Presupuestos', path: '/presupuestos', icon: '📋' },
+      { label: 'Sobres', path: '/sobres', icon: '✉️' },
+      { label: 'Metas', path: '/metas', icon: '🎯' },
+      { label: 'Departamento', path: '/departamento', icon: '🏠' },
+      { label: 'Retiro', path: '/retiro', icon: '👵' },
+      { label: 'Simulador', path: '/simulador', icon: '🔮' },
+    ],
+  },
+  {
+    label: 'Inteligencia',
+    icon: '🧠',
+    items: [
+      { label: 'Inteligencia', path: '/inteligencia', icon: '🧠' },
+      { label: 'Memoria financiera', path: '/memoria', icon: '🗂️' },
+      { label: 'Documentos', path: '/documentos', icon: '📁' },
+      { label: 'Calendario', path: '/calendario', icon: '📅' },
+    ],
+  },
+  {
+    label: 'Administración',
+    icon: '⚙️',
+    items: [
+      { label: 'Categorías', path: '/admin/categorias', icon: '🏷️' },
+      { label: 'Tipos de ingreso', path: '/admin/ingresos', icon: '💵' },
+      { label: 'Preferencias', path: '/admin/preferencias', icon: '⚙️' },
+    ],
+  },
 ]
+
+/** Flat list of every navigable item, used by the mobile "Más" sheet and search. */
+export const ALL_NAV_ITEMS: NavItem[] = NAV_GROUPS.flatMap((group) =>
+  group.path ? [{ label: group.label, path: group.path, icon: group.icon }] : group.items ?? [],
+)
 
 /** Primary shortcuts shown in the mobile bottom nav (max 4 + "Más"). */
 export const MOBILE_PRIMARY_ITEMS: NavItem[] = [
@@ -34,8 +80,3 @@ export const MOBILE_PRIMARY_ITEMS: NavItem[] = [
   { label: 'Deudas', path: '/deudas', icon: '💳' },
   { label: 'Metas', path: '/metas', icon: '🎯' },
 ]
-
-/** Everything not in the mobile primary row, surfaced under "Más". */
-export const MOBILE_MORE_ITEMS: NavItem[] = NAV_ITEMS.filter(
-  (item) => !MOBILE_PRIMARY_ITEMS.some((primary) => primary.path === item.path),
-)
