@@ -1,0 +1,13 @@
+-- Seed data for local development only.
+-- Requires an existing auth.users row (create one via `supabase auth` or the Studio UI first),
+-- then replace :user_id below with that user's UUID before running.
+
+-- Example (uncomment and edit):
+-- insert into public.expense_categories (user_id, name, icon, color) values
+--   (:'user_id', 'Comida', 'utensils', '#f97316'),
+--   (:'user_id', 'Transporte', 'car', '#3b82f6'),
+--   (:'user_id', 'Servicios', 'bolt', '#eab308'),
+--   (:'user_id', 'Entretenimiento', 'film', '#a855f7');
+--
+-- insert into public.accounts (user_id, name, type, opening_balance) values
+--   (:'user_id', 'Cuenta principal', 'checking', 0);
