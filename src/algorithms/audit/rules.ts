@@ -97,7 +97,9 @@ export function findOverBudgetCategories(variances: CategoryVariance[]): AuditFi
 export function findOverdueRecurringExpenses(recurring: RecurringExpense[], today = new Date()): AuditFinding[] {
   const todayISO = today.toISOString().slice(0, 10)
   return recurring
-    .filter((r) => r.is_active && r.next_due_date < todayISO)
+    .filter((r): r is RecurringExpense & { next_due_date: string } =>
+      Boolean(r.is_active && r.next_due_date && r.next_due_date < todayISO),
+    )
     .map((r) => ({
       type: 'due_date' as const,
       severity: 'warning' as const,

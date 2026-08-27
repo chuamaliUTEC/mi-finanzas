@@ -92,7 +92,8 @@ export interface RecurringExpense {
   name: string
   amount: number
   frequency: RecurringFrequency
-  next_due_date: ISODate
+  /** null = fecha de facturación exacta por confirmar — nunca se inventa. */
+  next_due_date: ISODate | null
   is_active: boolean
   created_at: ISODateTime
   updated_at: ISODateTime

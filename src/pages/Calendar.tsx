@@ -76,7 +76,7 @@ export default function CalendarPage() {
       if (statementDate) list.push({ date: statementDate, icon: '🧾', label: `Corte de tarjeta: ${card.name}` })
     }
     for (const recurring of recurringExpenses) {
-      if (recurring.is_active && recurring.next_due_date >= startISO && recurring.next_due_date <= endISO) {
+      if (recurring.is_active && recurring.next_due_date && recurring.next_due_date >= startISO && recurring.next_due_date <= endISO) {
         list.push({
           date: recurring.next_due_date,
           icon: '🔁',

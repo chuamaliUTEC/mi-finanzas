@@ -25,6 +25,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'Deudas', path: '/deudas', icon: '💳' },
       { label: 'Tarjetas', path: '/tarjetas', icon: '💳' },
       { label: 'Me deben', path: '/me-deben', icon: '💰' },
+      { label: 'Gastos recurrentes', path: '/gastos-recurrentes', icon: '🔁' },
     ],
   },
   {
