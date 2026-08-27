@@ -29,6 +29,7 @@ const Categories = lazy(() => import('@/pages/admin/Categories'))
 const IncomeTypes = lazy(() => import('@/pages/admin/IncomeTypes'))
 const Preferences = lazy(() => import('@/pages/admin/Preferences'))
 const Analysis = lazy(() => import('@/pages/Analysis'))
+const Onboarding = lazy(() => import('@/pages/Onboarding'))
 
 function PageFallback() {
   return <p className="p-6 text-sm text-gray-500">Cargando…</p>
@@ -215,6 +216,14 @@ export default function App() {
             element={
               <Suspense fallback={<PageFallback />}>
                 <Analysis />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/cuestionario"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <Onboarding />
               </Suspense>
             }
           />

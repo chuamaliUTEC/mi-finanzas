@@ -61,6 +61,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'Administración',
     icon: '⚙️',
     items: [
+      { label: 'Cuestionario financiero', path: '/cuestionario', icon: '📝' },
       { label: 'Categorías', path: '/admin/categorias', icon: '🏷️' },
       { label: 'Tipos de ingreso', path: '/admin/ingresos', icon: '💵' },
       { label: 'Preferencias', path: '/admin/preferencias', icon: '⚙️' },

@@ -12,10 +12,12 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { StatCard } from '@/components/StatCard'
 import { StatusBadge } from '@/components/StatusBadge'
 import { useSupabaseTable } from '@/hooks/useSupabaseTable'
+import { useOnboarding } from '@/hooks/useOnboarding'
 import { calculateLiquidity, calculateNetWorth } from '@/algorithms/networth'
 import { calculateSpendable } from '@/algorithms/budgeting/spendable'
 import { lastNMonthBuckets, sumByMonth } from '@/algorithms/analytics/timeseries'
@@ -55,8 +57,9 @@ export default function Dashboard() {
     orderBy: 'created_at',
     ascending: false,
   })
+  const { completedCount, totalSteps, loading: l10 } = useOnboarding()
 
-  const loading = l1 || l2 || l3 || l4 || l5 || l6 || l7 || l8 || l9
+  const loading = l1 || l2 || l3 || l4 || l5 || l6 || l7 || l8 || l9 || l10
 
   const firstName = user?.email?.split('@')[0] ?? ''
 
@@ -150,6 +153,19 @@ export default function Dashboard() {
         <p className="text-sm text-gray-500">Cargando datos…</p>
       ) : (
         <>
+          {completedCount < totalSteps && (
+            <Link
+              to="/cuestionario"
+              className="flex items-center justify-between rounded-lg border border-brand-200 bg-brand-50 p-3 text-sm text-brand-700 hover:bg-brand-100"
+            >
+              <span>
+                📝 Completa tu cuestionario financiero ({completedCount}/{totalSteps}) para
+                recomendaciones más precisas.
+              </span>
+              <span>→</span>
+            </Link>
+          )}
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard label="Puedes gastar" value={formatCurrency(spendable.amount)} tone="positive" />
             <StatCard
