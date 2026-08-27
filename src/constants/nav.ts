@@ -12,7 +12,15 @@ export interface NavGroup {
   items?: NavItem[]
 }
 
-/** Full navigation, grouped by the "¿Cómo estoy? / ¿Qué pasó? / ..." mental model. */
+/**
+ * Navegación reducida a lo que Carmen pidió mirar de momento: gasto, presupuesto
+ * del próximo mes y cuánto lleva gastado. El resto de páginas (Cuentas, Metas,
+ * Departamento, Retiro, Simulador, Inteligencia, Memoria financiera, Documentos,
+ * Calendario, Administración) sigue existiendo y es accesible por su URL directa
+ * — solo se sacaron del menú para no repetir el exceso de opciones que ya le
+ * falló en otras apps. Si hace falta traer alguna de vuelta, es un cambio de un
+ * minuto en este archivo.
+ */
 export const NAV_GROUPS: NavGroup[] = [
   { label: 'Dashboard', icon: '🏠', path: '/' },
   {
@@ -21,51 +29,20 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Ingresos', path: '/ingresos', icon: '💵' },
       { label: 'Gastos', path: '/gastos', icon: '💸' },
-      { label: 'Cuentas', path: '/cuentas', icon: '🏦' },
+      { label: 'Gastos recurrentes', path: '/gastos-recurrentes', icon: '🔁' },
       { label: 'Deudas', path: '/deudas', icon: '💳' },
       { label: 'Tarjetas', path: '/tarjetas', icon: '💳' },
       { label: 'Me deben', path: '/me-deben', icon: '💰' },
-      { label: 'Gastos recurrentes', path: '/gastos-recurrentes', icon: '🔁' },
     ],
   },
   {
-    label: 'Análisis',
+    label: 'Presupuesto y análisis',
     icon: '📊',
     items: [
       { label: 'Análisis', path: '/analisis', icon: '📊' },
-      { label: 'Forecast', path: '/forecast', icon: '🔮' },
-    ],
-  },
-  {
-    label: 'Planificación',
-    icon: '🎯',
-    items: [
-      { label: 'Presupuestos', path: '/presupuestos', icon: '📋' },
       { label: 'Sobres', path: '/sobres', icon: '✉️' },
+      { label: 'Presupuestos', path: '/presupuestos', icon: '📋' },
       { label: 'Metas', path: '/metas', icon: '🎯' },
-      { label: 'Departamento', path: '/departamento', icon: '🏠' },
-      { label: 'Retiro', path: '/retiro', icon: '👵' },
-      { label: 'Simulador', path: '/simulador', icon: '🔮' },
-    ],
-  },
-  {
-    label: 'Inteligencia',
-    icon: '🧠',
-    items: [
-      { label: 'Inteligencia', path: '/inteligencia', icon: '🧠' },
-      { label: 'Memoria financiera', path: '/memoria', icon: '🗂️' },
-      { label: 'Documentos', path: '/documentos', icon: '📁' },
-      { label: 'Calendario', path: '/calendario', icon: '📅' },
-    ],
-  },
-  {
-    label: 'Administración',
-    icon: '⚙️',
-    items: [
-      { label: 'Cuestionario financiero', path: '/cuestionario', icon: '📝' },
-      { label: 'Categorías', path: '/admin/categorias', icon: '🏷️' },
-      { label: 'Tipos de ingreso', path: '/admin/ingresos', icon: '💵' },
-      { label: 'Preferencias', path: '/admin/preferencias', icon: '⚙️' },
     ],
   },
 ]
@@ -80,5 +57,5 @@ export const MOBILE_PRIMARY_ITEMS: NavItem[] = [
   { label: 'Inicio', path: '/', icon: '🏠' },
   { label: 'Gastos', path: '/gastos', icon: '💸' },
   { label: 'Deudas', path: '/deudas', icon: '💳' },
-  { label: 'Metas', path: '/metas', icon: '🎯' },
+  { label: 'Análisis', path: '/analisis', icon: '📊' },
 ]

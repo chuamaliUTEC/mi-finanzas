@@ -142,6 +142,12 @@ export default function Dashboard() {
 
   const unreadAlerts = alerts.filter((a) => !a.is_read).slice(0, 4)
 
+  const cardDebt = useMemo(() => {
+    const known = creditCards.filter((c) => c.current_balance !== null)
+    const total = known.reduce((sum, c) => sum + Number(c.current_balance), 0)
+    return { total, hasUnknown: known.length < creditCards.length, count: creditCards.length }
+  }, [creditCards])
+
   return (
     <div className="space-y-6">
       <div>
@@ -153,6 +159,22 @@ export default function Dashboard() {
         <p className="text-sm text-gray-500">Cargando datos…</p>
       ) : (
         <>
+          {cardDebt.count > 0 && (
+            <div className="rounded-lg border border-brand-200 bg-brand-50 p-4 text-center">
+              <p className="text-xs font-medium uppercase tracking-wide text-brand-600">
+                La cifra única · cuánto debes en tarjetas hoy
+              </p>
+              <p className="mt-1 text-3xl font-semibold text-brand-800">
+                {formatCurrency(cardDebt.total)}
+                {cardDebt.hasUnknown && ' *'}
+              </p>
+              <p className="mt-1 text-xs text-gray-500">
+                Si este mes es menor que el anterior, vas bien.
+                {cardDebt.hasUnknown && ' * hay una tarjeta con saldo por confirmar, no incluida.'}
+              </p>
+            </div>
+          )}
+
           {completedCount < totalSteps && (
             <Link
               to="/cuestionario"

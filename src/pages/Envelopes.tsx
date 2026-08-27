@@ -2,7 +2,23 @@ import { useState, type FormEvent } from 'react'
 import { useEnvelopes } from '@/hooks/useEnvelopes'
 import { formatCurrency } from '@/utils/format'
 
+function monthStart(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`
+}
+
+function monthLabel(periodMonth: string) {
+  const [year, month] = periodMonth.split('-').map(Number)
+  return new Date(year, month - 1, 1).toLocaleDateString('es-PE', { month: 'long', year: 'numeric' })
+}
+
 export default function Envelopes() {
+  const [selectedMonth, setSelectedMonth] = useState(() => monthStart(new Date()))
+
+  const shiftMonth = (delta: number) => {
+    const [year, month] = selectedMonth.split('-').map(Number)
+    setSelectedMonth(monthStart(new Date(year, month - 1 + delta, 1)))
+  }
+
   const {
     periodMonth,
     budget,
@@ -14,7 +30,7 @@ export default function Envelopes() {
     error,
     ensureBudget,
     setEnvelopeAmount,
-  } = useEnvelopes()
+  } = useEnvelopes(selectedMonth)
 
   const [incomeInput, setIncomeInput] = useState('')
   const [creating, setCreating] = useState(false)
@@ -39,12 +55,35 @@ export default function Envelopes() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900">✉️ Sobres del mes</h2>
-        <p className="text-sm text-gray-500">
-          Cada sol de tu ingreso debe tener un destino. El dinero de un sobre no cuenta como
-          disponible para otro.
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">✉️ Sobres del mes</h2>
+          <p className="text-sm text-gray-500">
+            Cada sol de tu ingreso debe tener un destino. El dinero de un sobre no cuenta como
+            disponible para otro.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 rounded-md bg-gray-100 p-1 text-sm">
+          <button
+            type="button"
+            onClick={() => shiftMonth(-1)}
+            className="rounded-md px-2 py-1.5 font-medium text-gray-500 hover:bg-white"
+            aria-label="Mes anterior"
+          >
+            ←
+          </button>
+          <span className="min-w-32 px-1 text-center font-medium capitalize text-brand-700">
+            {monthLabel(selectedMonth)}
+          </span>
+          <button
+            type="button"
+            onClick={() => shiftMonth(1)}
+            className="rounded-md px-2 py-1.5 font-medium text-gray-500 hover:bg-white"
+            aria-label="Mes siguiente"
+          >
+            →
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -57,8 +96,8 @@ export default function Envelopes() {
           className="max-w-sm space-y-3 rounded-lg border border-gray-200 bg-white p-4"
         >
           <p className="text-sm text-gray-600">
-            Aún no hay presupuesto para {periodMonth}. Ingresa tu ingreso esperado para empezar a
-            asignar sobres.
+            Aún no hay presupuesto para {monthLabel(periodMonth)}. Ingresa tu ingreso esperado para
+            empezar a asignar sobres.
           </p>
           <input
             type="number"
