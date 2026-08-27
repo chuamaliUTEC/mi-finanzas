@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useSupabaseTable } from '@/hooks/useSupabaseTable'
 import { todayISODate } from '@/utils/format'
-import type { Expense, ExpenseCategory, IncomeTransaction } from '@/types/database'
+import type { Expense, ExpenseCategory, IncomeSource, IncomeTransaction } from '@/types/database'
 
 interface QuickAddModalProps {
   onClose: () => void
@@ -12,12 +12,14 @@ type Kind = 'gasto' | 'ingreso'
 export function QuickAddModal({ onClose }: QuickAddModalProps) {
   const [kind, setKind] = useState<Kind>('gasto')
   const { data: categories } = useSupabaseTable<ExpenseCategory>('expense_categories', { orderBy: 'name' })
+  const { data: sources } = useSupabaseTable<IncomeSource>('income_sources', { orderBy: 'name' })
   const { create: createExpense } = useSupabaseTable<Expense>('expenses')
   const { create: createIncome } = useSupabaseTable<IncomeTransaction>('income_transactions')
 
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [categoryId, setCategoryId] = useState('')
+  const [sourceId, setSourceId] = useState('')
   const [date, setDate] = useState(todayISODate())
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -39,6 +41,7 @@ export function QuickAddModal({ onClose }: QuickAddModalProps) {
             description,
             amount: Number(amount),
             received_at: date,
+            source_id: sourceId || null,
           } as Partial<IncomeTransaction>)
     setSubmitting(false)
     if (result.error) {
@@ -48,6 +51,7 @@ export function QuickAddModal({ onClose }: QuickAddModalProps) {
       setDescription('')
       setAmount('')
       setCategoryId('')
+      setSourceId('')
       setTimeout(onClose, 700)
     }
   }
@@ -103,7 +107,7 @@ export function QuickAddModal({ onClose }: QuickAddModalProps) {
               onChange={(e) => setAmount(e.target.value)}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
             />
-            {kind === 'gasto' && (
+            {kind === 'gasto' ? (
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
@@ -113,6 +117,19 @@ export function QuickAddModal({ onClose }: QuickAddModalProps) {
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <select
+                value={sourceId}
+                onChange={(e) => setSourceId(e.target.value)}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+              >
+                <option value="">Sin fuente específica</option>
+                {sources.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
                   </option>
                 ))}
               </select>

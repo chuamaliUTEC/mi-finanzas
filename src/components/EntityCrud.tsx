@@ -3,12 +3,21 @@ import { useSupabaseTable } from '@/hooks/useSupabaseTable'
 import { UnknownAmount } from '@/components/StatusBadge'
 import { formatCurrency, formatDate, todayISODate } from '@/utils/format'
 
+export interface EntityFieldOption {
+  value: string
+  label: string
+}
+
 export interface EntityField {
   name: string
   label: string
-  type: 'text' | 'number' | 'date'
+  type: 'text' | 'number' | 'date' | 'select'
   required?: boolean
   defaultValue?: string
+  /** Required when type is 'select'. Populate from a related table (e.g. categories). */
+  options?: EntityFieldOption[]
+  /** For type 'select': the label shown for an empty/no selection. */
+  placeholder?: string
 }
 
 interface EntityCrudProps<T extends { id: string }> {
@@ -105,6 +114,17 @@ export function EntityCrud<T extends { id: string }>({
     })
   }, [data, dateField, dateFrom, dateTo])
 
+  // Resolves a select field's stored id to its human label, e.g. category_id -> "Alimentación".
+  const selectFields = fields.filter((f) => f.type === 'select')
+  const optionLookup = useMemo(() => {
+    const lookup: Record<string, Record<string, string>> = {}
+    for (const field of selectFields) {
+      lookup[field.name] = Object.fromEntries((field.options ?? []).map((o) => [o.value, o.label]))
+    }
+    return lookup
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fields])
+
   return (
     <div className="space-y-4">
       <div>
@@ -174,15 +194,32 @@ export function EntityCrud<T extends { id: string }>({
               <label htmlFor={field.name} className="block text-xs font-medium text-gray-600">
                 {field.label}
               </label>
-              <input
-                id={field.name}
-                type={field.type}
-                required={field.required}
-                step={field.type === 'number' ? '0.01' : undefined}
-                value={values[field.name] ?? ''}
-                onChange={(e) => setValues((v) => ({ ...v, [field.name]: e.target.value }))}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-              />
+              {field.type === 'select' ? (
+                <select
+                  id={field.name}
+                  required={field.required}
+                  value={values[field.name] ?? ''}
+                  onChange={(e) => setValues((v) => ({ ...v, [field.name]: e.target.value }))}
+                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                >
+                  <option value="">{field.placeholder ?? 'Sin seleccionar'}</option>
+                  {(field.options ?? []).map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  id={field.name}
+                  type={field.type}
+                  required={field.required}
+                  step={field.type === 'number' ? '0.01' : undefined}
+                  value={values[field.name] ?? ''}
+                  onChange={(e) => setValues((v) => ({ ...v, [field.name]: e.target.value }))}
+                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+              )}
             </div>
           ))}
           <div className="flex items-end gap-2 sm:col-span-2 md:col-span-4">
@@ -215,9 +252,17 @@ export function EntityCrud<T extends { id: string }>({
                   className="text-left hover:text-brand-700"
                 >
                   <p className="text-gray-800">{String(item[labelField] ?? '—')}</p>
-                  {dateField && (
-                    <p className="text-xs text-gray-400">{formatDate(String(item[dateField]))}</p>
-                  )}
+                  <p className="text-xs text-gray-400">
+                    {[
+                      dateField ? formatDate(String(item[dateField])) : null,
+                      ...selectFields.map((f) => {
+                        const raw = item[f.name as keyof T]
+                        return raw ? optionLookup[f.name]?.[String(raw)] : null
+                      }),
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
                 </button>
                 <div className="flex items-center gap-3">
                   {amountField &&
