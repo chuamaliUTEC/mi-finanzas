@@ -15,20 +15,8 @@ const CreditCards = lazy(() => import('@/pages/CreditCards'))
 const Budgets = lazy(() => import('@/pages/Budgets'))
 const SavingsGoals = lazy(() => import('@/pages/SavingsGoals'))
 const Receivables = lazy(() => import('@/pages/Receivables'))
-const Documents = lazy(() => import('@/pages/Documents'))
-const FinancialMemoryPage = lazy(() => import('@/pages/FinancialMemory'))
 const Envelopes = lazy(() => import('@/pages/Envelopes'))
-const Departamento = lazy(() => import('@/pages/Departamento'))
-const Retiro = lazy(() => import('@/pages/Retiro'))
-const Intelligence = lazy(() => import('@/pages/Intelligence'))
-const Simulator = lazy(() => import('@/pages/Simulator'))
-const CalendarPage = lazy(() => import('@/pages/Calendar'))
-const Accounts = lazy(() => import('@/pages/Accounts'))
-const Categories = lazy(() => import('@/pages/admin/Categories'))
-const IncomeTypes = lazy(() => import('@/pages/admin/IncomeTypes'))
-const Preferences = lazy(() => import('@/pages/admin/Preferences'))
 const Analysis = lazy(() => import('@/pages/Analysis'))
-const Onboarding = lazy(() => import('@/pages/Onboarding'))
 const RecurringExpenses = lazy(() => import('@/pages/RecurringExpenses'))
 
 function PageFallback() {
@@ -108,22 +96,6 @@ export default function App() {
             }
           />
           <Route
-            path="/documentos"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <Documents />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/memoria"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <FinancialMemoryPage />
-              </Suspense>
-            }
-          />
-          <Route
             path="/sobres"
             element={
               <Suspense fallback={<PageFallback />}>
@@ -132,90 +104,10 @@ export default function App() {
             }
           />
           <Route
-            path="/departamento"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <Departamento />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/retiro"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <Retiro />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/inteligencia"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <Intelligence />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/simulador"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <Simulator />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/calendario"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <CalendarPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/cuentas"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <Accounts />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/admin/categorias"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <Categories />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/admin/ingresos"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <IncomeTypes />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/admin/preferencias"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <Preferences />
-              </Suspense>
-            }
-          />
-          <Route
             path="/analisis"
             element={
               <Suspense fallback={<PageFallback />}>
                 <Analysis />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/cuestionario"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <Onboarding />
               </Suspense>
             }
           />

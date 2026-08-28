@@ -13,13 +13,11 @@ export interface NavGroup {
 }
 
 /**
- * Navegación reducida a lo que Carmen pidió mirar de momento: gasto, presupuesto
- * del próximo mes y cuánto lleva gastado. El resto de páginas (Cuentas, Metas,
- * Departamento, Retiro, Simulador, Inteligencia, Memoria financiera, Documentos,
- * Calendario, Administración) sigue existiendo y es accesible por su URL directa
- * — solo se sacaron del menú para no repetir el exceso de opciones que ya le
- * falló en otras apps. Si hace falta traer alguna de vuelta, es un cambio de un
- * minuto en este archivo.
+ * Navegación reducida a lo esencial: gasto, ingreso, deuda y presupuesto.
+ * Las páginas que no aparecen aquí (Departamento, Retiro, Simulador,
+ * Inteligencia, Memoria financiera, Documentos, Calendario, Cuentas,
+ * Administración, Pronóstico) ya no existen en el código — se borraron por
+ * completo, no solo del menú.
  */
 export const NAV_GROUPS: NavGroup[] = [
   { label: 'Dashboard', icon: '🏠', path: '/' },
