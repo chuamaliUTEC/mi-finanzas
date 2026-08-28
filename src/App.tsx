@@ -20,7 +20,6 @@ const FinancialMemoryPage = lazy(() => import('@/pages/FinancialMemory'))
 const Envelopes = lazy(() => import('@/pages/Envelopes'))
 const Departamento = lazy(() => import('@/pages/Departamento'))
 const Retiro = lazy(() => import('@/pages/Retiro'))
-const ForecastPage = lazy(() => import('@/pages/Forecast'))
 const Intelligence = lazy(() => import('@/pages/Intelligence'))
 const Simulator = lazy(() => import('@/pages/Simulator'))
 const CalendarPage = lazy(() => import('@/pages/Calendar'))
@@ -145,14 +144,6 @@ export default function App() {
             element={
               <Suspense fallback={<PageFallback />}>
                 <Retiro />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/forecast"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <ForecastPage />
               </Suspense>
             }
           />

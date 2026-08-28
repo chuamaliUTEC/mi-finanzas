@@ -5,8 +5,6 @@ import {
   CartesianGrid,
   Cell,
   Legend,
-  Line,
-  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -65,16 +63,11 @@ export default function Analysis() {
       filteredExpenses.map((e) => ({ date: e.spent_at, amount: Number(e.amount) })),
       buckets,
     )
-    let running = 0
-    return buckets.map((b, i) => {
-      running += incomeTotals[i] - expenseTotals[i]
-      return {
-        mes: b.label,
-        Ingresos: incomeTotals[i],
-        Gastos: expenseTotals[i],
-        'Flujo acumulado': running,
-      }
-    })
+    return buckets.map((b, i) => ({
+      mes: b.label,
+      Ingresos: incomeTotals[i],
+      Gastos: expenseTotals[i],
+    }))
   }, [filteredIncome, filteredExpenses, buckets])
 
   const categoryBreakdown = useMemo(() => {
@@ -184,24 +177,6 @@ export default function Analysis() {
                   <Bar dataKey="Ingresos" fill="#8b46e8" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="Gastos" fill="#f87171" radius={[4, 4, 0, 0]} />
                 </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-gray-200 bg-white p-4">
-            <h3 className="mb-3 text-sm font-medium text-gray-700">Flujo de caja acumulado</h3>
-            <p className="mb-2 text-xs text-gray-400">
-              Ingresos menos gastos acumulados en el período. No incluye deudas ni metas.
-            </p>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={evolutionData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                  <XAxis dataKey="mes" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} width={50} />
-                  <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                  <Line type="monotone" dataKey="Flujo acumulado" stroke="#8b46e8" strokeWidth={2} dot={false} />
-                </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
