@@ -141,6 +141,7 @@ export interface Expense {
   id: string
   user_id: string
   account_id: string | null
+  credit_card_id: string | null
   category_id: string | null
   subcategory_id: string | null
   amount: number
@@ -155,6 +156,77 @@ export interface Expense {
   is_emotional: boolean
   status: 'confirmado' | 'pendiente' | 'anulado'
   receipt_url: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface CreditCard {
+  id: string
+  user_id: string
+  name: string
+  issuer: string | null
+  credit_line: number
+  cash_line: number
+  currency: string
+  tea_purchases: number | null
+  tea_cash: number | null
+  tea_usd: number | null
+  membership_fee: number
+  insurance_monthly: number
+  closing_day: number | null
+  payment_day: number | null
+  benefits: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface Debt {
+  id: string
+  user_id: string
+  creditor: string
+  name: string | null
+  type: 'revolvente' | 'cuotas' | 'prestamo_personal' | 'sin_intereses' | 'otro'
+  credit_card_id: string | null
+  initial_balance: number
+  currency: string
+  tea: number | null
+  tcea: number | null
+  rate_type: 'tea' | 'tcea' | 'sin_interes'
+  installment_amount: number | null
+  minimum_payment: number | null
+  num_installments: number | null
+  installments_paid: number
+  insurance_monthly: number
+  fees_monthly: number
+  due_day: number | null
+  target_payoff_date: string | null
+  priority: 'baja' | 'media' | 'alta' | 'muy_alta'
+  status: 'activa' | 'pagada' | 'en_mora' | 'congelada' | 'no_activada'
+  allows_early_payoff: 'si' | 'no' | 'desconocido'
+  payment_strategy: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface DebtPayment {
+  id: string
+  user_id: string
+  debt_id: string
+  account_id: string | null
+  date: string
+  amount: number
+  principal_amount: number
+  interest_amount: number
+  insurance_amount: number
+  fees_amount: number
+  penalty_amount: number
+  is_extra_payment: boolean
+  notes: string | null
   created_at: string
   updated_at: string
   deleted_at: string | null
@@ -187,6 +259,9 @@ export interface TableRows {
   expense_subcategories: ExpenseSubcategory
   expenses: Expense
   transfers: Transfer
+  credit_cards: CreditCard
+  debts: Debt
+  debt_payments: DebtPayment
 }
 
 export type TableName = keyof TableRows

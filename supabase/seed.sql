@@ -97,3 +97,51 @@ where not exists (
   select 1 from public.extraordinary_income_allocations
   where extraordinary_income_id = '44444444-0000-0000-0000-000000000002'
 );
+
+-- ---------------------------------------------------------------------------
+-- Fase 2: tarjetas y deudas iniciales (secc. 5-6).
+-- ---------------------------------------------------------------------------
+insert into public.credit_cards
+  (id, user_id, name, issuer, credit_line, cash_line, tea_purchases, tea_cash, tea_usd,
+   membership_fee, insurance_monthly, closing_day, payment_day, benefits)
+values
+  ('55555555-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
+   'BCP Visa', 'BCP', 4740, 0, 87.50, 87.50, 66.00, 350, 0, 26, 20, 'Millas LATAM Pass'),
+  ('55555555-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111',
+   'SIP', 'SIP', 2000, 1600, 109.83, 109.83, null, 69.90, 15.90, 28, 25, 'Cashback')
+on conflict (id) do nothing;
+
+insert into public.debts
+  (id, user_id, creditor, name, type, credit_card_id, initial_balance, tea, tcea, rate_type,
+   installment_amount, minimum_payment, num_installments, installments_paid,
+   insurance_monthly, due_day, target_payoff_date, priority, status, allows_early_payoff, notes)
+values
+  ('66666666-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
+   'SIP', 'Tarjeta SIP', 'revolvente', '55555555-0000-0000-0000-000000000002',
+   980.99, 109.83, null, 'tea', null, null, null, 0, 15.90, 25, null,
+   'muy_alta', 'activa', 'desconocido', null),
+  ('66666666-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111',
+   'BCP', 'Tarjeta BCP Visa', 'revolvente', '55555555-0000-0000-0000-000000000001',
+   3194.84, 87.50, null, 'tea', null, 348.44, null, 0, 0, 20, null,
+   'muy_alta', 'activa', 'desconocido', 'Saldo aproximado.'),
+  ('66666666-0000-0000-0000-000000000003', '11111111-1111-1111-1111-111111111111',
+   'Rody', 'Préstamo Rody', 'sin_intereses', null,
+   810, 0, null, 'sin_interes', null, null, null, 0, 0, null, '2026-11-30',
+   'alta', 'activa', 'si', 'Sin intereses; debe quedar en 0 en noviembre 2026.'),
+  ('66666666-0000-0000-0000-000000000004', '11111111-1111-1111-1111-111111111111',
+   'Compartamos', 'Préstamo Compartamos', 'cuotas', null,
+   4967, null, 62.7586, 'tcea', 430, 430, 18, 2, 13.44, null, null,
+   'media', 'activa', 'desconocido',
+   'Monto inicial S/ 5,171; capital estimado tras 2 cuotas ~S/ 4,967. Quedan 16 cuotas de S/ 430 (S/ 6,880).'),
+  ('66666666-0000-0000-0000-000000000005', '11111111-1111-1111-1111-111111111111',
+   'UTEC', 'Créditos UTEC', 'otro', null,
+   84633.60, null, null, 'sin_interes', null, null, null, 0, 0, null, null,
+   'baja', 'no_activada', 'si',
+   '153.6 créditos × S/ 551. Aumenta hasta S/ 60 por año; permite adelanto. No activada aún.')
+on conflict (id) do nothing;
+
+-- La gratificación pre-asignada apunta ahora a la deuda BCP concreta.
+update public.extraordinary_income_allocations
+set target_id = '66666666-0000-0000-0000-000000000002'
+where extraordinary_income_id = '44444444-0000-0000-0000-000000000002'
+  and target_id is null;

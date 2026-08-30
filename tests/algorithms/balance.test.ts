@@ -42,6 +42,7 @@ function expense(overrides: Partial<Expense>): Expense {
     id: 'e1',
     user_id: 'u1',
     account_id: 'a1',
+    credit_card_id: null,
     category_id: null,
     subcategory_id: null,
     amount: 50,

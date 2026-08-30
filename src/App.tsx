@@ -9,6 +9,7 @@ import { Section } from '@/pages/Section'
 import { Mas } from '@/pages/Mas'
 import { Cuentas } from '@/pages/Cuentas'
 import { Registrar } from '@/pages/Registrar'
+import { Deudas } from '@/pages/Deudas'
 
 export default function App() {
   return (
@@ -23,7 +24,7 @@ export default function App() {
             <Route path="/" element={<Section />} />
             <Route path="/registrar" element={<Registrar />} />
             <Route path="/cuentas" element={<Cuentas />} />
-            <Route path="/deudas" element={<Section />} />
+            <Route path="/deudas" element={<Deudas />} />
             <Route path="/presupuesto" element={<Section />} />
             <Route path="/metas" element={<Section />} />
             <Route path="/decisiones" element={<Section />} />
