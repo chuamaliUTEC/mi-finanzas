@@ -1,5 +1,6 @@
 import { round2 } from '@/algorithms/accounts/balance'
-import type { SavingsContribution, SavingsGoal } from '@/types/database'
+import { computeDebtBalance } from '@/algorithms/debt/debts'
+import type { Debt, DebtPayment, SavingsContribution, SavingsGoal } from '@/types/database'
 
 // Metas de ahorro y fondo de emergencia (secc. 19-20).
 
@@ -14,6 +15,44 @@ export function goalCurrentAmount(goal: SavingsGoal, contributions: SavingsContr
 export function goalProgress(goal: SavingsGoal, contributions: SavingsContribution[]): number {
   if (goal.target_amount <= 0) return 0
   return Math.min(1, goalCurrentAmount(goal, contributions) / goal.target_amount)
+}
+
+/**
+ * Progreso de una meta de ELIMINAR DEUDA: no se mide por aportes a una
+ * alcancía, sino por cuánto ha bajado el saldo de la deuda. Así, pagar la
+ * deuda hace avanzar la meta sola, sin registrar nada dos veces.
+ */
+export function debtGoalProgress(
+  goal: SavingsGoal,
+  debts: Debt[],
+  payments: DebtPayment[],
+): { paid: number; remaining: number; ratio: number } | null {
+  if (!goal.debt_id) return null
+  const debt = debts.find((d) => d.id === goal.debt_id)
+  if (!debt) return null
+  const remaining = computeDebtBalance(debt, payments)
+  const paid = round2(Math.max(0, debt.initial_balance - remaining))
+  const ratio = debt.initial_balance > 0 ? Math.min(1, paid / debt.initial_balance) : 1
+  return { paid, remaining, ratio }
+}
+
+/**
+ * Progreso de cualquier meta: usa el saldo de la deuda si está vinculada,
+ * y los aportes en caso contrario.
+ */
+export function anyGoalProgress(
+  goal: SavingsGoal,
+  contributions: SavingsContribution[],
+  debts: Debt[],
+  payments: DebtPayment[],
+): { current: number; ratio: number; fromDebt: boolean } {
+  const fromDebt = debtGoalProgress(goal, debts, payments)
+  if (fromDebt) return { current: fromDebt.paid, ratio: fromDebt.ratio, fromDebt: true }
+  return {
+    current: goalCurrentAmount(goal, contributions),
+    ratio: goalProgress(goal, contributions),
+    fromDebt: false,
+  }
 }
 
 /** Meses estimados para alcanzar la meta al ritmo de aporte dado. */

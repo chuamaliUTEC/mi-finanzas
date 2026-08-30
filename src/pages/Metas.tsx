@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTable } from '@/hooks/useTable'
 import {
+  anyGoalProgress,
   emergencyFundStages,
   goalCurrentAmount,
   goalProgress,
@@ -135,8 +136,9 @@ export function Metas() {
         {goals.rows
           .filter((g) => g.kind !== 'fondo_emergencia' || g.id !== emergencyGoal?.id)
           .map((goal) => {
-            const current = goalCurrentAmount(goal, contributions.rows)
-            const progress = goalProgress(goal, contributions.rows)
+            const { current, ratio: progress, fromDebt } = anyGoalProgress(
+              goal, contributions.rows, debts.rows, debtPayments.rows,
+            )
             const months = monthsToGoal(goal, contributions.rows)
             return (
               <div key={goal.id} className="card space-y-2">
@@ -160,7 +162,8 @@ export function Metas() {
                 </div>
                 <p className="text-xs text-ink-500">
                   {formatPercent(progress)}
-                  {goal.monthly_contribution
+                  {fromDebt && ' pagado de esta deuda · avanza sola cuando registras un pago'}
+                  {!fromDebt && goal.monthly_contribution
                     ? months === 0
                       ? ' · ¡meta alcanzada!'
                       : Number.isFinite(months)
@@ -170,22 +173,30 @@ export function Metas() {
                   {goal.target_date ? ` · fecha objetivo: ${goal.target_date}` : ''}
                 </p>
                 <div className="flex items-center gap-2">
-                  <input
-                    className="input w-32 !py-1.5"
-                    type="number"
-                    step="0.01"
-                    placeholder="Aporte S/"
-                    value={contribDrafts[goal.id] ?? ''}
-                    onChange={(e) =>
-                      setContribDrafts((d) => ({ ...d, [goal.id]: e.target.value }))
-                    }
-                  />
-                  <button
-                    className="text-sm text-lavender-700"
-                    onClick={() => void addContribution(goal.id)}
-                  >
-                    Aportar
-                  </button>
+                  {fromDebt ? (
+                    <p className="text-xs text-ink-400">
+                      Registra los pagos en “Deudas y tarjetas”: esta meta se actualiza sola.
+                    </p>
+                  ) : (
+                    <>
+                      <input
+                        className="input w-32 !py-1.5"
+                        type="number"
+                        step="0.01"
+                        placeholder="Aporte S/"
+                        value={contribDrafts[goal.id] ?? ''}
+                        onChange={(e) =>
+                          setContribDrafts((d) => ({ ...d, [goal.id]: e.target.value }))
+                        }
+                      />
+                      <button
+                        className="text-sm text-lavender-700"
+                        onClick={() => void addContribution(goal.id)}
+                      >
+                        Aportar
+                      </button>
+                    </>
+                  )}
                   <button
                     className="ml-auto text-sm text-critical"
                     onClick={() => void goals.remove(goal.id)}

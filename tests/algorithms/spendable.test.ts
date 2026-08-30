@@ -66,6 +66,7 @@ function source(overrides: Partial<IncomeSource>): IncomeSource {
     id: Math.random().toString(36).slice(2), user_id: 'u1', name: 'S',
     kind: 'fijo', recurrence: 'mensual', expected_amount: 100,
     currency: 'PEN', reliability: 'alta', is_verified: true,
+    verification_status: 'confirmado', verification_note: null,
     expected_day: null, is_active: true, notes: null,
     created_at: '', updated_at: '', deleted_at: null,
     ...overrides,
@@ -76,7 +77,7 @@ function card(overrides: Partial<CreditCard>): CreditCard {
   return {
     id: Math.random().toString(36).slice(2), user_id: 'u1', name: 'Card',
     issuer: null, credit_line: 1000, cash_line: 0, currency: 'PEN',
-    tea_purchases: null, tea_cash: null, tea_usd: null, membership_fee: 0,
+    tea_purchases: null, tea_cash: null, tea_usd: null, tea_cash_advance: null, membership_charge_date: null, membership_fee: 0,
     insurance_monthly: 0, closing_day: null, payment_day: null,
     benefits: null, notes: null, created_at: '', updated_at: '', deleted_at: null,
     ...overrides,

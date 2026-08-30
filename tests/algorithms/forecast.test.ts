@@ -53,6 +53,7 @@ function source(overrides: Partial<IncomeSource> = {}): IncomeSource {
     id: Math.random().toString(36).slice(2), user_id: 'u1', name: 'Sueldo',
     kind: 'fijo', recurrence: 'mensual', expected_amount: 2405,
     currency: 'PEN', reliability: 'alta', is_verified: false,
+    verification_status: 'estimado', verification_note: null,
     expected_day: 24, is_active: true, notes: null,
     created_at: '', updated_at: '', deleted_at: null,
     ...overrides,

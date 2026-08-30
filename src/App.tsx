@@ -7,6 +7,7 @@ import { Signup } from '@/pages/auth/Signup'
 import { Onboarding } from '@/pages/Onboarding'
 import { Mas } from '@/pages/Mas'
 import { Cuentas } from '@/pages/Cuentas'
+import { Ingresos } from '@/pages/Ingresos'
 import { Registrar } from '@/pages/Registrar'
 import { Deudas } from '@/pages/Deudas'
 import { Presupuesto } from '@/pages/Presupuesto'
@@ -34,6 +35,7 @@ export default function App() {
             <Route path="/" element={<Inicio />} />
             <Route path="/registrar" element={<Registrar />} />
             <Route path="/cuentas" element={<Cuentas />} />
+            <Route path="/ingresos" element={<Ingresos />} />
             <Route path="/deudas" element={<Deudas />} />
             <Route path="/presupuesto" element={<Presupuesto />} />
             <Route path="/metas" element={<Metas />} />

@@ -52,7 +52,7 @@ function card(overrides: Partial<CreditCard>): CreditCard {
   return {
     id: Math.random().toString(36).slice(2), user_id: 'u1', name: 'Visa',
     issuer: null, credit_line: 4740, cash_line: 0, currency: 'PEN',
-    tea_purchases: 87.5, tea_cash: null, tea_usd: null, membership_fee: 0,
+    tea_purchases: 87.5, tea_cash: null, tea_usd: null, tea_cash_advance: null, membership_charge_date: null, membership_fee: 0,
     insurance_monthly: 0, closing_day: null, payment_day: null,
     benefits: null, notes: null, created_at: '', updated_at: '', deleted_at: null,
     ...overrides,
@@ -103,7 +103,8 @@ function extraordinary(overrides: Partial<ExtraordinaryIncome>): ExtraordinaryIn
   return {
     id: Math.random().toString(36).slice(2), user_id: 'u1', name: 'CTS',
     expected_amount: 735, currency: 'PEN', expected_date: null,
-    status: 'esperado', received_amount: null, received_date: null,
+    status: 'esperado', verification_status: 'estimado',
+    received_amount: null, received_date: null,
     notes: null, created_at: '', updated_at: '', deleted_at: null,
     ...overrides,
   }
@@ -113,7 +114,7 @@ function goal(overrides: Partial<SavingsGoal>): SavingsGoal {
   return {
     id: 'g1', user_id: 'u1', name: 'Fondo', kind: 'fondo_emergencia',
     target_amount: 1600, currency: 'PEN', target_date: null,
-    monthly_contribution: null, priority: 'alta', status: 'activa',
+    monthly_contribution: null, priority: 'alta', status: 'activa', debt_id: null,
     notes: null, created_at: '', updated_at: '', deleted_at: null,
     ...overrides,
   }

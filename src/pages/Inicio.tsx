@@ -64,7 +64,17 @@ export function Inicio() {
           Esta semana: <strong>{formatCurrency(spendable.week)}</strong> · este mes:{' '}
           <strong>{formatCurrency(spendable.month)}</strong>
         </p>
-        {spendable.month < 0 && (
+        {overview.missingBalanceAccounts.length > 0 && (
+          <p className="mt-2 text-sm text-warning">
+            ⚠️ Falta el saldo de{' '}
+            {overview.missingBalanceAccounts.map((a) => a.name).join(', ')}.{' '}
+            <Link to="/cuentas" className="font-medium underline">
+              Regístralo
+            </Link>{' '}
+            para que esta cifra sea real.
+          </p>
+        )}
+        {spendable.month < 0 && overview.missingBalanceAccounts.length === 0 && (
           <p className="mt-2 text-sm text-critical">
             🔴 Tus obligaciones del mes superan tu dinero disponible.
           </p>

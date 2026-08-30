@@ -3,7 +3,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTable } from '@/hooks/useTable'
-import { computeAccountBalance, computeAvailableMoney } from '@/algorithms/accounts/balance'
+import {
+  accountsMissingBalance,
+  computeAccountBalanceOrNull,
+  computeAvailableMoney,
+} from '@/algorithms/accounts/balance'
 import { BigFigure } from '@/components/ui/BigFigure'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { formatCurrency } from '@/utils/format'
@@ -23,7 +27,8 @@ const schema = z.object({
   name: z.string().min(1, 'Ponle un nombre'),
   type: z.enum(['bancaria', 'ahorro', 'sueldo', 'efectivo', 'yape', 'plin', 'inversion']),
   institution: z.string().optional(),
-  initial_balance: z.coerce.number(),
+  // Vacío = saldo desconocido. No es lo mismo que cero.
+  initial_balance: z.union([z.coerce.number(), z.literal('')]),
   is_verified: z.boolean(),
 })
 
@@ -42,6 +47,7 @@ export function Cuentas() {
   )
 
   const available = computeAvailableMoney(accounts.rows, balanceData)
+  const missingBalance = accountsMissingBalance(accounts.rows)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -57,14 +63,19 @@ export function Cuentas() {
         name: account.name,
         type: account.type,
         institution: account.institution ?? '',
-        initial_balance: account.initial_balance,
+        initial_balance: account.initial_balance ?? '',
         is_verified: account.is_verified,
       })
     }
   }
 
   async function onSubmit(values: FormValues) {
-    const payload = { ...values, institution: values.institution || null }
+    const payload = {
+      ...values,
+      institution: values.institution || null,
+      // Cadena vacía => el saldo queda como desconocido, no como cero.
+      initial_balance: values.initial_balance === '' ? null : values.initial_balance,
+    }
     if (editing === 'new') await accounts.insert(payload)
     else if (editing) await accounts.update(editing.id, payload)
     setEditing(null)
@@ -87,15 +98,22 @@ export function Cuentas() {
       <BigFigure
         label="💵 Dinero disponible real"
         amount={available}
-        hint="Solo cuentas verificadas. Los activos no verificados y el crédito no cuentan aquí."
+        hint="Solo cuentas verificadas con saldo registrado. Los activos no verificados y el crédito no cuentan aquí."
       />
+
+      {missingBalance.length > 0 && (
+        <div className="rounded-xl border border-warning/40 bg-warning/5 px-4 py-3 text-sm text-ink-700">
+          Falta el saldo de {missingBalance.map((a) => a.name).join(', ')}. Mientras no lo
+          registres, ese dinero no entra en el cálculo — y “Puedes gastar” se queda corto.
+        </div>
+      )}
 
       {loading ? (
         <p className="text-sm text-ink-400">Cargando…</p>
       ) : (
         <div className="space-y-3">
           {accounts.rows.map((account) => {
-            const balance = computeAccountBalance(account, balanceData)
+            const balance = computeAccountBalanceOrNull(account, balanceData)
             return (
               <div key={account.id} className="card flex items-center justify-between gap-4">
                 <div>
@@ -113,9 +131,13 @@ export function Cuentas() {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <p className="text-lg font-semibold text-ink-900">
-                    {formatCurrency(balance, account.currency)}
-                  </p>
+                  {balance === null ? (
+                    <p className="text-sm text-ink-400">Saldo pendiente de actualizar</p>
+                  ) : (
+                    <p className="text-lg font-semibold text-ink-900">
+                      {formatCurrency(balance, account.currency)}
+                    </p>
+                  )}
                   <button className="text-sm text-lavender-700" onClick={() => startEdit(account)}>
                     Editar
                   </button>
@@ -165,8 +187,17 @@ export function Cuentas() {
               <input className="input" {...form.register('institution')} />
             </div>
             <div>
-              <label className="label">Saldo inicial (S/)</label>
-              <input className="input" type="number" step="0.01" {...form.register('initial_balance')} />
+              <label className="label">Saldo actual (S/)</label>
+              <input
+                className="input"
+                type="number"
+                step="0.01"
+                placeholder="Déjalo vacío si aún no lo sabes"
+                {...form.register('initial_balance')}
+              />
+              <p className="mt-1 text-xs text-ink-400">
+                Vacío = “no lo sé todavía”. Escribe 0 solo si de verdad tienes cero.
+              </p>
             </div>
           </div>
           <label className="flex items-center gap-2 text-sm text-ink-700">

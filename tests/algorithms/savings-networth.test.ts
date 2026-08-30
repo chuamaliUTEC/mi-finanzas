@@ -21,7 +21,7 @@ function goal(overrides: Partial<SavingsGoal>): SavingsGoal {
   return {
     id: 'g1', user_id: 'u1', name: 'Meta', kind: 'otro', target_amount: 1600,
     currency: 'PEN', target_date: null, monthly_contribution: null,
-    priority: 'media', status: 'activa', notes: null,
+    priority: 'media', status: 'activa', debt_id: null, notes: null,
     created_at: '', updated_at: '', deleted_at: null,
     ...overrides,
   }
@@ -82,6 +82,7 @@ function asset(overrides: Partial<Asset>): Asset {
   return {
     id: Math.random().toString(36).slice(2), user_id: 'u1', name: 'A',
     kind: 'otro', value: 100, currency: 'PEN', is_verified: false,
+    verification_status: 'no_verificado',
     notes: null, created_at: '', updated_at: '', deleted_at: null,
     ...overrides,
   }

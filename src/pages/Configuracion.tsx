@@ -21,6 +21,7 @@ export function Configuracion() {
   const categories = useTable('expense_categories', { orderBy: 'sort_order', ascending: true })
   const accounts = useTable('accounts')
   const auditLogs = useTable('audit_logs', { softDelete: false })
+  const pending = useTable('pending_verifications', { orderBy: 'sort_order', ascending: true })
 
   const [step, setStep] = useState<Step>('archivo')
   const [fileName, setFileName] = useState('')
@@ -153,8 +154,33 @@ export function Configuracion() {
             <dd className="text-ink-900">{profile?.employer ?? '—'}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-ink-500">Prioridad financiera</dt>
-            <dd className="text-ink-900">{profile?.financial_priority ?? '—'}</dd>
+            <dt className="text-ink-500">Régimen</dt>
+            <dd className="text-ink-900">{profile?.employment_regime ?? '—'}</dd>
+          </div>
+          <div className="flex justify-between">
+            <dt className="text-ink-500">AFP</dt>
+            <dd className="text-ink-900">{profile?.pension_fund ?? '—'}</dd>
+          </div>
+          <div className="flex justify-between">
+            <dt className="text-ink-500">Salud</dt>
+            <dd className="text-ink-900">
+              {profile?.health_insurance ?? '—'}
+              {profile?.health_insurance_cost
+                ? ` · ${formatCurrency(profile.health_insurance_cost)}`
+                : ''}
+            </dd>
+          </div>
+          <div className="flex justify-between">
+            <dt className="text-ink-500">Vivienda</dt>
+            <dd className="text-ink-900">{profile?.housing ?? '—'}</dd>
+          </div>
+          <div className="flex justify-between">
+            <dt className="text-ink-500">Dependientes</dt>
+            <dd className="text-ink-900">{profile?.dependents ?? '—'}</dd>
+          </div>
+          <div className="flex justify-between gap-6">
+            <dt className="shrink-0 text-ink-500">Prioridad financiera</dt>
+            <dd className="text-right text-ink-900">{profile?.financial_priority ?? '—'}</dd>
           </div>
         </dl>
         <button className="btn-secondary" onClick={() => void refreshProfile()}>
@@ -365,6 +391,46 @@ export function Configuracion() {
             Agregar
           </button>
         </div>
+      </section>
+
+      {/* Pendientes por verificar */}
+      <section className="card space-y-3">
+        <div>
+          <h2 className="font-medium text-ink-900">Pendientes por verificar</h2>
+          <p className="mt-1 text-sm text-ink-500">
+            Datos que aún no puedes dar por ciertos. Nada de esto cuenta como deuda ni como
+            dinero hasta que lo confirmes.
+          </p>
+        </div>
+        {pending.rows.filter((p) => p.status === 'pendiente').map((item) => (
+          <div key={item.id} className="rounded-xl border border-ink-100 p-3">
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm font-medium text-ink-900">
+                {item.priority === 'critico' ? '🔴' : '🟡'} {item.title}
+                {item.amount !== null && (
+                  <span className="ml-2 font-normal text-ink-500">
+                    {formatCurrency(item.amount)}
+                  </span>
+                )}
+              </p>
+              <button
+                className="shrink-0 text-sm text-lavender-700"
+                onClick={() =>
+                  void pending.update(item.id, {
+                    status: 'resuelto',
+                    resolved_at: new Date().toISOString(),
+                  })
+                }
+              >
+                Resuelto
+              </button>
+            </div>
+            {item.detail && <p className="mt-1 text-xs text-ink-500">{item.detail}</p>}
+          </div>
+        ))}
+        {pending.rows.filter((p) => p.status === 'pendiente').length === 0 && !pending.loading && (
+          <p className="text-sm text-positive">✅ No tienes pendientes por verificar.</p>
+        )}
       </section>
 
       {/* Auditoría */}

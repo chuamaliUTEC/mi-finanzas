@@ -2,6 +2,8 @@
 // que se agregan tablas (ver docs/ARQUITECTURA.md, sección 4).
 
 export type Reliability = 'alta' | 'media' | 'baja'
+/** Estado de verificación de un dato: nunca mezclar una estimación con dinero real. */
+export type VerificationStatus = 'confirmado' | 'estimado' | 'pendiente' | 'no_verificado'
 export type IncomeStatus = 'realizado' | 'esperado' | 'estimado' | 'pendiente' | 'no_verificado'
 export type PaymentMethod =
   | 'efectivo'
@@ -28,6 +30,14 @@ export interface Profile {
   birth_date: string | null
   employer: string | null
   employment_start_date: string | null
+  age: number | null
+  employment_regime: string | null
+  pension_fund: string | null
+  health_insurance: string | null
+  health_insurance_cost: number | null
+  housing: string | null
+  dependents: string | null
+  education: string | null
   financial_priority: string | null
   onboarding_completed_at: string | null
   created_at: string
@@ -52,7 +62,8 @@ export interface Account {
   type: AccountType
   institution: string | null
   currency: string
-  initial_balance: number
+  /** null = saldo desconocido (no es cero). */
+  initial_balance: number | null
   is_verified: boolean
   created_at: string
   updated_at: string
@@ -69,6 +80,8 @@ export interface IncomeSource {
   currency: string
   reliability: Reliability
   is_verified: boolean
+  verification_status: VerificationStatus
+  verification_note: string | null
   expected_day: number | null
   is_active: boolean
   notes: string | null
@@ -100,6 +113,7 @@ export interface ExtraordinaryIncome {
   currency: string
   expected_date: string | null
   status: 'esperado' | 'recibido' | 'cancelado'
+  verification_status: VerificationStatus
   received_amount: number | null
   received_date: string | null
   notes: string | null
@@ -172,6 +186,8 @@ export interface CreditCard {
   tea_purchases: number | null
   tea_cash: number | null
   tea_usd: number | null
+  tea_cash_advance: number | null
+  membership_charge_date: string | null
   membership_fee: number
   insurance_monthly: number
   closing_day: number | null
@@ -304,6 +320,8 @@ export interface SavingsGoal {
   monthly_contribution: number | null
   priority: 'baja' | 'media' | 'alta' | 'muy_alta'
   status: 'activa' | 'pausada' | 'lograda' | 'cancelada'
+  /** Si apunta a una deuda, el progreso se deriva del saldo real de esa deuda. */
+  debt_id: string | null
   notes: string | null
   created_at: string
   updated_at: string
@@ -358,6 +376,7 @@ export interface Asset {
   value: number
   currency: string
   is_verified: boolean
+  verification_status: VerificationStatus
   notes: string | null
   created_at: string
   updated_at: string
@@ -437,6 +456,34 @@ export interface FinancialEvent {
   created_at: string
 }
 
+export interface PendingVerification {
+  id: string
+  user_id: string
+  title: string
+  detail: string | null
+  amount: number | null
+  priority: 'critico' | 'operativo'
+  status: 'pendiente' | 'resuelto' | 'descartado'
+  resolved_at: string | null
+  sort_order: number
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface SpendingRange {
+  id: string
+  user_id: string
+  category_id: string | null
+  label: string
+  min_amount: number
+  max_amount: number
+  period_note: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
 // Mapa nombre-de-tabla → tipo de fila, usado por el hook CRUD genérico.
 export interface TableRows {
   profiles: Profile
@@ -466,6 +513,8 @@ export interface TableRows {
   if_then_plans: IfThenPlan
   learning_adjustments: LearningAdjustment
   financial_events: FinancialEvent
+  pending_verifications: PendingVerification
+  spending_ranges: SpendingRange
 }
 
 export type TableName = keyof TableRows

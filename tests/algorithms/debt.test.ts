@@ -50,7 +50,7 @@ function card(overrides: Partial<CreditCard>): CreditCard {
     id: 'c1', user_id: 'u1', name: 'Tarjeta', issuer: null,
     credit_line: 4740, cash_line: 0, currency: 'PEN',
     tea_purchases: 87.5, tea_cash: null, tea_usd: null,
-    membership_fee: 0, insurance_monthly: 0, closing_day: null,
+    tea_cash_advance: null, membership_charge_date: null, membership_fee: 0, insurance_monthly: 0, closing_day: null,
     payment_day: null, benefits: null, notes: null,
     created_at: '', updated_at: '', deleted_at: null,
     ...overrides,

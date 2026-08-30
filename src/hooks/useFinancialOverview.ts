@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useTable } from '@/hooks/useTable'
-import { computeAvailableMoney } from '@/algorithms/accounts/balance'
+import { accountsMissingBalance, computeAvailableMoney } from '@/algorithms/accounts/balance'
 import { computeSpendable, upcomingPayments } from '@/algorithms/spendable/spendable'
 import { isInMonth } from '@/algorithms/budget/budget'
 import { committedMonthlySavings, goalCurrentAmount } from '@/algorithms/savings/savings'
@@ -46,6 +46,8 @@ export function useFinancialOverview(today = new Date()) {
       }),
     [accounts.rows, incomes.rows, expenses.rows, transfers.rows],
   )
+
+  const missingBalanceAccounts = accountsMissingBalance(accounts.rows)
 
   const currentBudget = budgets.rows.find((b) => b.year === year && b.month === month)
   const monthBudgetCategories = useMemo(
@@ -120,6 +122,8 @@ export function useFinancialOverview(today = new Date()) {
     year,
     month,
     availableMoney,
+    /** Cuentas verificadas cuyo saldo aún no se registró: sin ellas la cifra queda incompleta. */
+    missingBalanceAccounts,
     spendable,
     upcoming,
     upcomingTotal: upcoming.reduce((sum, p) => sum + p.amount, 0),
