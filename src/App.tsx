@@ -5,7 +5,6 @@ import { AppShell } from '@/layouts/AppShell'
 import { Login } from '@/pages/auth/Login'
 import { Signup } from '@/pages/auth/Signup'
 import { Onboarding } from '@/pages/Onboarding'
-import { Section } from '@/pages/Section'
 import { Mas } from '@/pages/Mas'
 import { Cuentas } from '@/pages/Cuentas'
 import { Registrar } from '@/pages/Registrar'
@@ -19,6 +18,8 @@ import { Reglas } from '@/pages/Reglas'
 import { Calendario } from '@/pages/Calendario'
 import { Pronostico } from '@/pages/Pronostico'
 import { Configuracion } from '@/pages/Configuracion'
+import { Reportes } from '@/pages/Reportes'
+import { MiSituacion } from '@/pages/MiSituacion'
 
 export default function App() {
   return (
@@ -40,7 +41,8 @@ export default function App() {
             <Route path="/decisiones" element={<Decisiones />} />
             <Route path="/calendario" element={<Calendario />} />
             <Route path="/pronostico" element={<Pronostico />} />
-            <Route path="/reportes" element={<Section />} />
+            <Route path="/reportes" element={<Reportes />} />
+            <Route path="/mi-situacion" element={<MiSituacion />} />
             <Route path="/reglas" element={<Reglas />} />
             <Route path="/configuracion" element={<Configuracion />} />
             <Route path="/mas" element={<Mas />} />

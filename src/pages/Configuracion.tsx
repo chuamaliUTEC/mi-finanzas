@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useTable } from '@/hooks/useTable'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/hooks/authContext'
 import {
   buildCandidates,
   parseCsv,

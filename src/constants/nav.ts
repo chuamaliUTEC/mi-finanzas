@@ -17,6 +17,7 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/presupuesto', label: 'Presupuesto', icon: '📊' },
   { to: '/metas', label: 'Metas', icon: '🎯', mobilePrimary: true },
   { to: '/decisiones', label: '¿Qué debo hacer?', icon: '🧠' },
+  { to: '/mi-situacion', label: 'Mi situación', icon: '🧭' },
   { to: '/calendario', label: 'Calendario', icon: '📅' },
   { to: '/pronostico', label: 'Pronóstico', icon: '📈' },
   { to: '/reportes', label: 'Reportes', icon: '🗂️' },

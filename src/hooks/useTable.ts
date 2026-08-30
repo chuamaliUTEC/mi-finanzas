@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/hooks/authContext'
 import type { TableName, TableRows } from '@/types/database'
 
 // Entidades cuyos cambios se registran en audit_logs (secc. 39). El resto

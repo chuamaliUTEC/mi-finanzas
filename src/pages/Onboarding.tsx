@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/hooks/authContext'
 
 // Onboarding (secc. 41). Los pasos escriben directo en la base de datos;
 // deudas, tarjetas, gastos recurrentes y metas se registran en sus propios

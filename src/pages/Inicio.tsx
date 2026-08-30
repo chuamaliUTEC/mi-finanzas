@@ -4,7 +4,7 @@ import { useFinancialOverview } from '@/hooks/useFinancialOverview'
 import { monthlyExpectedIncome } from '@/algorithms/spendable/spendable'
 import { SEVERITY_ICON } from '@/algorithms/rules/engine'
 import { isInMonth } from '@/algorithms/budget/budget'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/hooks/authContext'
 import { formatCurrency, formatDate } from '@/utils/format'
 
 // Dashboard minimalista (secc. 13-14): una cifra protagonista ("puedes

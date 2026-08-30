@@ -192,6 +192,64 @@ un test de "usuario A no puede leer datos de usuario B".
 
 ## 8. Plan de fases
 
-Ver Fase 0 en este commit. Fases 1-9 siguen el orden del prompt
-maestro; cada una se construye, verifica (lint/test/build) y documenta
-antes de empezar la siguiente.
+Las 10 fases están completas. Cada una se construyó, se verificó
+(lint + tests + build en verde) y se documentó antes de empezar la
+siguiente, según pedía el prompt maestro.
+
+| Fase | Entregado | Tests acumulados |
+|---|---|---|
+| 0 | Arquitectura, auth, RLS, diseño, layout responsive | 4 |
+| 1 | Núcleo financiero + onboarding + registro rápido | 15 |
+| 2 | Deudas, tarjetas, amortización, estrategias | 36 |
+| 3 | Presupuesto, proyección al cierre, recurrentes | 45 |
+| 4 | Dashboard y "puedes gastar" | 55 |
+| 5 | Metas, fondo de emergencia, por cobrar, patrimonio | 63 |
+| 6 | Motor de reglas, decisiones, aprendizaje, calendario | 91 |
+| 7 | Forecasting, escenarios, simulador | 110 |
+| 8 | Importación CSV, mapeo, duplicados | 136 |
+| 9 | Reportes, Mi situación, accesibilidad | 143 |
+
+### Decisiones tomadas durante la construcción
+
+Además de los conflictos resueltos en la sección 1, aparecieron estas
+decisiones al implementar:
+
+1. **Las compras con tarjeta no se duplican.** El prompt pedía una tabla
+   `credit_card_transactions`, pero una compra con tarjeta ya es un
+   gasto: se modela como `expenses.credit_card_id`. Duplicarla en dos
+   tablas garantizaría que tarde o temprano difieran.
+
+2. **La utilización de una tarjeta se deriva de sus deudas vinculadas**
+   (`debts.credit_card_id`), no se guarda como número aparte. Así pagar
+   la deuda baja la utilización automáticamente, sin dos cifras que
+   puedan contradecirse.
+
+3. **Ningún saldo se almacena.** Cuentas, deudas, metas y cuentas por
+   cobrar calculan su saldo desde los movimientos. Es más lento de
+   consultar, pero elimina la clase entera de bugs donde el saldo
+   guardado y los movimientos dejan de cuadrar.
+
+4. **Una fecha comprometida pesa más que la tasa** en la prioridad
+   dinámica de deudas. Incumplir una fecha dada a otra persona tiene un
+   costo que no se mide en TEA; por eso una deuda al 0 % que vence en un
+   mes va antes que una al 62 % sin fecha, igual que en el plan del
+   propio prompt (octubre = Rody).
+
+5. **Los recurrentes sin fecha de cobro conocida se reservan igual** en
+   el cálculo de "puedes gastar". Es la opción conservadora: es peor
+   decirle a alguien que puede gastar dinero que en realidad ya está
+   comprometido.
+
+6. **Los duplicados de importación exigen coincidencia de descripción**,
+   no solo fecha y monto. Dos pasajes de S/ 5 el mismo día son dos
+   gastos reales, no un duplicado.
+
+7. **El pronóstico usa la mediana cuando detecta meses atípicos** y la
+   media ponderada cuando la serie es limpia, para que un mes
+   excepcional no arrastre 12 meses de proyección. Con menos de dos
+   meses cerrados usa lo declarado y lo dice en la interfaz, en vez de
+   fingir precisión.
+
+8. **La puntuación de "Mi situación" se presenta como orientativa** y
+   cada indicador explica qué significa y cómo mejora — nunca como
+   diagnóstico ni como score crediticio.
