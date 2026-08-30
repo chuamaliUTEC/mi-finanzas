@@ -1,20 +1,21 @@
 import { Navigate, Outlet } from 'react-router-dom'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/hooks/authContext'
 
 export function ProtectedRoute() {
-  const { session, loading } = useAuth()
+  const { session, profile, loading } = useAuth()
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center text-gray-500">
+      <div className="flex min-h-screen items-center justify-center text-ink-400">
         Cargando…
       </div>
     )
   }
 
-  if (!session) {
-    return <Navigate to="/login" replace />
-  }
+  if (!session) return <Navigate to="/ingresar" replace />
+
+  // Usuario nuevo sin mapa financiero → onboarding primero (secc. 41).
+  if (profile && !profile.onboarding_completed_at) return <Navigate to="/onboarding" replace />
 
   return <Outlet />
 }

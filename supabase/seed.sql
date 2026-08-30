@@ -1,131 +1,187 @@
--- Seed: perfil financiero inicial de Carmen Rosa Huamali.
---
--- CÓMO EJECUTAR:
--- 1. Crea tu cuenta primero desde la app (Registrarse) para que exista tu fila
---    en auth.users / profiles.
--- 2. Copia tu user id desde Supabase Studio (Authentication → Users).
--- 3. Ejecuta este archivo pasando ese id como variable, por ejemplo:
---      psql "$DATABASE_URL" -v user_id="'00000000-0000-0000-0000-000000000000'" -f supabase/seed.sql
---    (o pégalo en el SQL Editor de Supabase reemplazando :'user_id' por tu UUID real).
---
--- Principio seguido en todo este archivo: nunca inventar un dato desconocido.
--- Donde el monto real no se conoce con certeza, se deja NULL (columna) o se
--- registra como 'por_confirmar' / 'desactualizado' (memoria), nunca como 0.
--- Cualquier cifra calculada a partir de datos parciales se marca ESTIMADO
--- en el texto, nunca se guarda como si fuera un dato confirmado.
+-- Seed de desarrollo local (supabase db reset). Carga el perfil financiero
+-- inicial del prompt maestro como DATOS, nunca como lógica (secc. 40).
+-- En producción estos datos se ingresan vía onboarding; este archivo solo
+-- facilita probar la app localmente con un usuario demo:
+--   correo: demo@mifinanzas.local  ·  contraseña: demo123456
 
-update public.profiles
-set full_name = 'Carmen Rosa Huamali', currency = 'PEN', locale = 'es-PE', timezone = 'America/Lima'
-where id = :'user_id';
+-- Usuario demo en auth.users (solo válido en el stack local de Supabase).
+insert into auth.users (
+  instance_id, id, aud, role, email, encrypted_password,
+  email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+  created_at, updated_at
+)
+values (
+  '00000000-0000-0000-0000-000000000000',
+  '11111111-1111-1111-1111-111111111111',
+  'authenticated', 'authenticated',
+  'demo@mifinanzas.local',
+  crypt('demo123456', gen_salt('bf')),
+  now(),
+  '{"provider":"email","providers":["email"]}',
+  '{}',
+  now(), now()
+)
+on conflict (id) do nothing;
 
--- ============================================================
--- Perfil y objetivos (memoria financiera, categoría "actual")
--- ============================================================
-insert into public.financial_memory (user_id, memory_key, memory_value, confidence, source, status) values
-  (:'user_id', 'perfil_demografico', '{"texto": "25 años, Lima, Perú, soltera. Plan de matrimonio estimado entre los 29 y 32 años."}', 0.9, 'usuario', 'actual'),
-  (:'user_id', 'perfil_riesgo', '{"texto": "Riesgo medio. Prioridad: estabilidad antes que rentabilidad agresiva."}', 0.9, 'usuario', 'actual'),
-  (:'user_id', 'objetivo_retiro', '{"texto": "Retiro objetivo a los 60 años, año 2062 (horizonte ~35 años)."}', 0.9, 'usuario', 'actual'),
-  (:'user_id', 'objetivo_departamento', '{"texto": "Comprar departamento antes de los 30 años. Precio objetivo, cuota inicial y fecha exacta: por definir."}', 0.7, 'usuario', 'actual'),
-  (:'user_id', 'prioridad_financiera', '{"texto": "1) Eliminar deuda cara y préstamos con fechas vencidas. 2) Comprar departamento antes de los 30. 3) Construir patrimonio para el retiro a los 60. Manteniendo siempre una reserva mínima de liquidez."}', 0.9, 'usuario', 'actual'),
-  (:'user_id', 'regla_ingreso_inversion', '{"texto": "Los S/.230 mensuales de bonos/utilidades están destinados a inversión y NO deben considerarse dinero disponible para gasto."}', 0.95, 'usuario', 'actual'),
-  (:'user_id', 'meta_fondo_emergencia', '{"texto": "Primera etapa: 1 mes de gastos esenciales. Luego ampliar a 3-6 meses. Monto exacto pendiente de calcular sobre gastos esenciales reales."}', 0.7, 'usuario', 'actual'),
-  (:'user_id', 'deuda_rody', '{"texto": "Se le debe a Rody aproximadamente S/.1,400. Objetivo de pago: noviembre."}', 0.8, 'usuario', 'actual'),
-  (:'user_id', 'prestamo_bancario_progreso', '{"texto": "Plazo original 18 meses, cuota aprox. S/.430/mes, vencimiento día 24. Van 2 de 18 cuotas pagadas (quedan 16). ESTIMADO de saldo pendiente: ~S/.6,880 (16 cuotas x S/.430, no incluye intereses, NO es el saldo real confirmado). Tasa de interés: por confirmar."}', 0.6, 'usuario', 'actual'),
-  (:'user_id', 'tarjeta_principal_detalle', '{"texto": "Consumo total S/.3,851.43. Incluye un componente en USD (283.54) y otro en PEN (S/.2,883.14) — estas cifras no reconcilian exactamente entre sí, pendiente de aclarar con el estado de cuenta. Se realizó el pago mínimo, pero queda un saldo de S/.2,427.63 que debía pagarse el 20 de agosto y sigue vencido/sin pagar. Fecha de pago: día 20 de cada mes."}', 0.8, 'usuario', 'actual'),
-  (:'user_id', 'tarjeta_secundaria_detalle', '{"texto": "Segunda tarjeta: consumo S/.943.14. Cierra el día 28 de cada mes; el pago correspondiente vence el día 25 del mes siguiente. Próximo vencimiento: 25 de septiembre."}', 0.8, 'usuario', 'actual')
+insert into auth.identities (
+  id, user_id, provider_id, identity_data, provider, created_at, updated_at
+)
+values (
+  gen_random_uuid(),
+  '11111111-1111-1111-1111-111111111111',
+  '11111111-1111-1111-1111-111111111111',
+  '{"sub":"11111111-1111-1111-1111-111111111111","email":"demo@mifinanzas.local"}',
+  'email', now(), now()
+)
 on conflict do nothing;
 
--- ============================================================
--- Datos históricos / desactualizados — se conservan, pero NO deben
--- usarse como cifras actuales para ningún cálculo.
--- ============================================================
-insert into public.financial_memory (user_id, memory_key, memory_value, confidence, source, status, effective_date) values
-  (:'user_id', 'salario_mensual', '{"texto": "S/.2,000 (salario declarado en un registro anterior)."}', 0.5, 'usuario', 'historico', '2025-01-01'),
-  (:'user_id', 'remuneracion_bruta_anterior', '{"texto": "S/.2,850 remuneración bruta declarada anteriormente."}', 0.4, 'usuario', 'desactualizado', '2025-01-01'),
-  (:'user_id', 'compensacion_anual_objetivo', '{"texto": "S/.41,097 compensación anual objetivo declarada anteriormente."}', 0.4, 'usuario', 'desactualizado', '2025-01-01'),
-  (:'user_id', 'ingreso_neto_aprox_anterior', '{"texto": "Aproximadamente S/.2,650 después de descuentos (dato anterior)."}', 0.4, 'usuario', 'desactualizado', '2025-01-01'),
-  (:'user_id', 'bonos_semanales_anteriores', '{"texto": "Bonos semanales aproximados de S/.100 (dato anterior, sin confirmar vigencia)."}', 0.3, 'usuario', 'desactualizado', '2025-01-01'),
-  (:'user_id', 'liquidez_ultima_conocida', '{"texto": "S/.73 disponibles (último dato conocido). NO usar como saldo actual sin confirmación."}', 0.3, 'usuario', 'desactualizado', current_date),
-  (:'user_id', 'gasto_mascota_referencia', '{"texto": "Referencia: un saco de alimento para gatos de S/.198 dura aprox. 2 meses, para los dos gatos."}', 0.5, 'usuario', 'desactualizado', current_date),
-  (:'user_id', 'receivable_cop_historico', '{"texto": "Registros en COP sin nombre de deudor confirmado: COP 80,000; luego COP 150,000; menos COP 10,500 pagados = COP 139,500 pendientes según el último cálculo. Ambiguo: falta confirmar a quién corresponde y si son montos acumulativos o revisiones del mismo saldo antes de crear el registro formal en Cuentas por Cobrar."}', 0.3, 'usuario', 'desactualizado', current_date)
-on conflict do nothing;
+-- El trigger on_auth_user_created ya creó profile + categorías por defecto.
+update public.profiles set
+  full_name = 'Carmen',
+  base_currency = 'PEN',
+  employer = 'SOLGAS S.A.',
+  employment_start_date = '2026-08-10',
+  onboarding_completed_at = now()
+where user_id = '11111111-1111-1111-1111-111111111111';
 
--- ============================================================
--- Ingresos actuales declarados (memoria — el monto real de cada
--- transacción se registra aparte, en income_transactions, a medida
--- que ocurre; esto es la cifra "esperada" vigente).
--- ============================================================
-insert into public.financial_memory (user_id, memory_key, memory_value, confidence, source, status) values
-  (:'user_id', 'salario_mensual', '{"texto": "S/.2,600 (salario fijo declarado actual)."}', 0.9, 'usuario', 'actual'),
-  (:'user_id', 'ingreso_consultoria_mensual', '{"texto": "Aproximadamente S/.600 por consultoría independiente. Variable, no garantizado."}', 0.7, 'usuario', 'actual'),
-  (:'user_id', 'ingreso_potencial_total', '{"texto": "Ingreso potencial combinado aprox. S/.3,430 (S/.2,600 salario + S/.600 consultoría + S/.230 destinados a inversión). No tratar como dinero 100% disponible para gasto."}', 0.8, 'usuario', 'actual')
-on conflict do nothing;
+-- Cuentas (secc. 28). El saldo actual = initial_balance + movimientos.
+insert into public.accounts (id, user_id, name, type, institution, initial_balance, is_verified)
+values
+  ('22222222-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
+   'Cuenta sueldo Interbank', 'sueldo', 'Interbank', 0, true),
+  ('22222222-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111',
+   'Efectivo', 'efectivo', null, 0, true),
+  ('22222222-0000-0000-0000-000000000003', '11111111-1111-1111-1111-111111111111',
+   'Yape', 'yape', 'BCP', 0, true),
+  ('22222222-0000-0000-0000-000000000004', '11111111-1111-1111-1111-111111111111',
+   'Trading', 'inversion', null, 3000, false)  -- ⚠️ NO VERIFICADO (secc. 30)
+on conflict (id) do nothing;
 
--- ============================================================
--- Fuentes de ingreso actuales (estructuradas)
--- ============================================================
-insert into public.income_sources (user_id, name, is_recurring, source_type, frequency, earmarked_for, status) values
-  (:'user_id', 'Salario fijo', true, 'fijo', 'mensual', null, 'actual'),
-  (:'user_id', 'Consultoría independiente', true, 'variable', 'mensual', null, 'actual'),
-  (:'user_id', 'Bonos/utilidades', true, 'destinado_especifico', 'irregular', 'inversion', 'actual')
-on conflict do nothing;
+-- Fuentes de ingreso (secc. 3).
+insert into public.income_sources
+  (id, user_id, name, kind, recurrence, expected_amount, reliability, is_verified, expected_day, notes)
+values
+  ('33333333-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
+   'Sueldo SOLGAS', 'fijo', 'mensual', 2405, 'alta', false, 24,
+   'Neto estimado; pendiente de verificar con boleta. Único ingreso verificable para evaluación bancaria.'),
+  ('33333333-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111',
+   'Aporte familiar', 'fijo', 'semanal', 100, 'alta', true, null,
+   'S/ 100 por semana (~S/ 433 al mes).'),
+  ('33333333-0000-0000-0000-000000000003', '11111111-1111-1111-1111-111111111111',
+   'Trabajos parciales', 'variable', 'mensual', 600, 'media', false, null, null),
+  ('33333333-0000-0000-0000-000000000004', '11111111-1111-1111-1111-111111111111',
+   'Trading', 'variable', 'mensual', 230, 'baja', false, null, 'Sin verificar.')
+on conflict (id) do nothing;
 
--- ============================================================
--- Deudas
--- ============================================================
--- current_balance/original_amount/interest_rate NULL = por confirmar
--- (nunca asumir 0 cuando se desconoce). Van 2 de 18 cuotas pagadas del
--- préstamo bancario; el saldo exacto queda como ESTIMADO en financial_memory,
--- no aquí, porque esta columna es para el dato confirmado.
-insert into public.debts (user_id, name, creditor, original_amount, current_balance, interest_rate, minimum_payment, due_day, currency, status, status_detail) values
-  (:'user_id', 'Préstamo bancario', null, null, null, null, 430, 24, 'PEN', 'active', 'por_confirmar'),
-  (:'user_id', 'Deuda personal', 'Rody', 1400, 1400, 0, null, null, 'PEN', 'active', 'confirmado')
-on conflict do nothing;
+-- Ingresos extraordinarios (secc. 4) con asignación previa de destino.
+insert into public.extraordinary_incomes (id, user_id, name, expected_amount, expected_date, notes)
+values
+  ('44444444-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
+   'CTS estimada', 735, '2026-11-15', null),
+  ('44444444-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111',
+   'Gratificación estimada', 1990, '2026-12-15', '100% destinada a deuda BCP antes de recibirse.')
+on conflict (id) do nothing;
+-- Los cobros pendientes (Piero, Leopoldo) viven en el módulo ME DEBEN
+-- (receivables, Fase 5) para no contarse dos veces.
 
--- ============================================================
--- Tarjetas de crédito
--- ============================================================
--- Tarjeta principal: consumo confirmado S/.3,851.43. El desglose USD/PEN y
--- el saldo vencido de S/.2,427.63 (debía pagarse el 20 de agosto) están en
--- financial_memory porque no reconcilian limpiamente en columnas numéricas.
--- Límite y tasa de interés: por confirmar.
-insert into public.credit_cards (user_id, name, issuer, credit_limit, current_balance, payment_due_day, interest_rate, currency, status_detail) values
-  (:'user_id', 'Tarjeta principal', null, null, 3851.43, 20, null, 'PEN', 'confirmado'),
-  (:'user_id', 'Tarjeta secundaria', null, null, 943.14, 25, null, 'PEN', 'confirmado')
-on conflict do nothing;
+-- La gratificación queda pre-asignada 100% a deuda (el target_id concreto se
+-- enlaza cuando exista la deuda BCP en la Fase 2 del seed, más abajo en este
+-- archivo a medida que crezca).
+insert into public.extraordinary_income_allocations
+  (user_id, extraordinary_income_id, target_type, percent)
+select '11111111-1111-1111-1111-111111111111',
+       '44444444-0000-0000-0000-000000000002', 'deuda', 100
+where not exists (
+  select 1 from public.extraordinary_income_allocations
+  where extraordinary_income_id = '44444444-0000-0000-0000-000000000002'
+);
 
-update public.credit_cards
-set statement_day = 28
-where user_id = :'user_id' and name = 'Tarjeta secundaria';
+-- ---------------------------------------------------------------------------
+-- Fase 2: tarjetas y deudas iniciales (secc. 5-6).
+-- ---------------------------------------------------------------------------
+insert into public.credit_cards
+  (id, user_id, name, issuer, credit_line, cash_line, tea_purchases, tea_cash, tea_usd,
+   membership_fee, insurance_monthly, closing_day, payment_day, benefits)
+values
+  ('55555555-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
+   'BCP Visa', 'BCP', 4740, 0, 87.50, 87.50, 66.00, 350, 0, 26, 20, 'Millas LATAM Pass'),
+  ('55555555-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111',
+   'SIP', 'SIP', 2000, 1600, 109.83, 109.83, null, 69.90, 15.90, 28, 25, 'Cashback')
+on conflict (id) do nothing;
 
--- ============================================================
--- Categorías de gasto (incluye Mascotas como categoría independiente)
--- ============================================================
-insert into public.expense_categories (user_id, name) values
-  (:'user_id', 'Alimentación'),
-  (:'user_id', 'Transporte'),
-  (:'user_id', 'Mascotas'),
-  (:'user_id', 'Vivienda'),
-  (:'user_id', 'Servicios'),
-  (:'user_id', 'Suscripciones'),
-  (:'user_id', 'Deudas'),
-  (:'user_id', 'Ahorro'),
-  (:'user_id', 'Departamento'),
-  (:'user_id', 'Inversiones'),
-  (:'user_id', 'Retiro'),
-  (:'user_id', 'Gastos personales'),
-  (:'user_id', 'Ocio'),
-  (:'user_id', 'Salud'),
-  (:'user_id', 'Educación'),
-  (:'user_id', 'Viajes'),
-  (:'user_id', 'Gastos extraordinarios'),
-  (:'user_id', 'Dinero libre')
-on conflict (user_id, name) do nothing;
+insert into public.debts
+  (id, user_id, creditor, name, type, credit_card_id, initial_balance, tea, tcea, rate_type,
+   installment_amount, minimum_payment, num_installments, installments_paid,
+   insurance_monthly, due_day, target_payoff_date, priority, status, allows_early_payoff, notes)
+values
+  ('66666666-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
+   'SIP', 'Tarjeta SIP', 'revolvente', '55555555-0000-0000-0000-000000000002',
+   980.99, 109.83, null, 'tea', null, null, null, 0, 15.90, 25, null,
+   'muy_alta', 'activa', 'desconocido', null),
+  ('66666666-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111',
+   'BCP', 'Tarjeta BCP Visa', 'revolvente', '55555555-0000-0000-0000-000000000001',
+   3194.84, 87.50, null, 'tea', null, 348.44, null, 0, 0, 20, null,
+   'muy_alta', 'activa', 'desconocido', 'Saldo aproximado.'),
+  ('66666666-0000-0000-0000-000000000003', '11111111-1111-1111-1111-111111111111',
+   'Rody', 'Préstamo Rody', 'sin_intereses', null,
+   810, 0, null, 'sin_interes', null, null, null, 0, 0, null, '2026-11-30',
+   'alta', 'activa', 'si', 'Sin intereses; debe quedar en 0 en noviembre 2026.'),
+  ('66666666-0000-0000-0000-000000000004', '11111111-1111-1111-1111-111111111111',
+   'Compartamos', 'Préstamo Compartamos', 'cuotas', null,
+   4967, null, 62.7586, 'tcea', 430, 430, 18, 2, 13.44, null, null,
+   'media', 'activa', 'desconocido',
+   'Monto inicial S/ 5,171; capital estimado tras 2 cuotas ~S/ 4,967. Quedan 16 cuotas de S/ 430 (S/ 6,880).'),
+  ('66666666-0000-0000-0000-000000000005', '11111111-1111-1111-1111-111111111111',
+   'UTEC', 'Créditos UTEC', 'otro', null,
+   84633.60, null, null, 'sin_interes', null, null, null, 0, 0, null, null,
+   'baja', 'no_activada', 'si',
+   '153.6 créditos × S/ 551. Aumenta hasta S/ 60 por año; permite adelanto. No activada aún.')
+on conflict (id) do nothing;
 
--- ============================================================
--- Alerta: pago de tarjeta principal vencido sin pagar
--- ============================================================
-insert into public.financial_alerts (user_id, type, severity, title, message) values
-  (:'user_id', 'due_date', 'critical', 'Pago de tarjeta vencido',
-   'Tarjeta principal: queda un saldo de S/.2,427.63 que debía pagarse el 20 de agosto y sigue sin pagar (se hizo solo el pago mínimo).')
-on conflict do nothing;
+-- La gratificación pre-asignada apunta ahora a la deuda BCP concreta.
+update public.extraordinary_income_allocations
+set target_id = '66666666-0000-0000-0000-000000000002'
+where extraordinary_income_id = '44444444-0000-0000-0000-000000000002'
+  and target_id is null;
+
+-- ---------------------------------------------------------------------------
+-- Fase 3: gastos recurrentes iniciales (secc. 10).
+-- ---------------------------------------------------------------------------
+insert into public.recurring_expenses
+  (id, user_id, name, amount, category_id, due_day, needs_verification, notes)
+select
+  v.id::uuid, '11111111-1111-1111-1111-111111111111', v.name, v.amount,
+  (select id from public.expense_categories
+   where user_id = '11111111-1111-1111-1111-111111111111' and name = v.category),
+  v.due_day, v.needs_verification, v.notes
+from (values
+  ('77777777-0000-0000-0000-000000000001', 'Spotify', 32.90, 'Suscripciones', null::smallint, false, null),
+  ('77777777-0000-0000-0000-000000000002', 'YouTube', 6.00, 'Suscripciones', null, false, null),
+  ('77777777-0000-0000-0000-000000000003', 'IA', 88.00, 'Suscripciones', null, false, 'Aproximado.'),
+  ('77777777-0000-0000-0000-000000000004', 'Apple', 4.00, 'Suscripciones', null, false, 'Aproximado.'),
+  ('77777777-0000-0000-0000-000000000005', 'Internet', 35.00, 'Vivienda', null, false, 'Aproximado.'),
+  ('77777777-0000-0000-0000-000000000006', 'Comida del gato', 109.00, 'Mascotas', null, false, 'Aproximado.'),
+  ('77777777-0000-0000-0000-000000000007', 'Balón de gas', 7.50, 'Vivienda', null, false, 'Aproximado (prorrateado).'),
+  ('77777777-0000-0000-0000-000000000008', 'Seguro SIP', 15.90, 'Deudas', null, false, null),
+  ('77777777-0000-0000-0000-000000000009', 'Cargo Pacífico', 12.99, 'Otros', null, true, 'Pendiente de verificar si corresponde.')
+) as v(id, name, amount, category, due_day, needs_verification, notes)
+on conflict (id) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- Fase 5: fondo de emergencia, cuentas por cobrar (secc. 19, 31).
+-- ---------------------------------------------------------------------------
+insert into public.savings_goals
+  (id, user_id, name, kind, target_amount, priority, notes)
+values
+  ('88888888-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
+   'Fondo de emergencia', 'fondo_emergencia', 1600, 'alta',
+   'Objetivo inicial ~S/ 1,600; se recalcula según el gasto esencial promedio.')
+on conflict (id) do nothing;
+
+insert into public.receivables (id, user_id, person, original_amount, status)
+values
+  ('99999999-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
+   'Piero', 500, 'pendiente'),
+  ('99999999-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111',
+   'Leopoldo', 35, 'pendiente')
+on conflict (id) do nothing;
