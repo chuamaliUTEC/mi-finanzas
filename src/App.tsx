@@ -18,6 +18,7 @@ import { Decisiones } from '@/pages/Decisiones'
 import { Reglas } from '@/pages/Reglas'
 import { Calendario } from '@/pages/Calendario'
 import { Pronostico } from '@/pages/Pronostico'
+import { Configuracion } from '@/pages/Configuracion'
 
 export default function App() {
   return (
@@ -41,7 +42,7 @@ export default function App() {
             <Route path="/pronostico" element={<Pronostico />} />
             <Route path="/reportes" element={<Section />} />
             <Route path="/reglas" element={<Reglas />} />
-            <Route path="/configuracion" element={<Section />} />
+            <Route path="/configuracion" element={<Configuracion />} />
             <Route path="/mas" element={<Mas />} />
           </Route>
         </Route>
