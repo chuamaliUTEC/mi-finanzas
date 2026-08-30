@@ -7,6 +7,8 @@ import { Signup } from '@/pages/auth/Signup'
 import { Onboarding } from '@/pages/Onboarding'
 import { Section } from '@/pages/Section'
 import { Mas } from '@/pages/Mas'
+import { Cuentas } from '@/pages/Cuentas'
+import { Registrar } from '@/pages/Registrar'
 
 export default function App() {
   return (
@@ -19,8 +21,8 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<AppShell />}>
             <Route path="/" element={<Section />} />
-            <Route path="/registrar" element={<Section />} />
-            <Route path="/cuentas" element={<Section />} />
+            <Route path="/registrar" element={<Registrar />} />
+            <Route path="/cuentas" element={<Cuentas />} />
             <Route path="/deudas" element={<Section />} />
             <Route path="/presupuesto" element={<Section />} />
             <Route path="/metas" element={<Section />} />
