@@ -145,3 +145,26 @@ update public.extraordinary_income_allocations
 set target_id = '66666666-0000-0000-0000-000000000002'
 where extraordinary_income_id = '44444444-0000-0000-0000-000000000002'
   and target_id is null;
+
+-- ---------------------------------------------------------------------------
+-- Fase 3: gastos recurrentes iniciales (secc. 10).
+-- ---------------------------------------------------------------------------
+insert into public.recurring_expenses
+  (id, user_id, name, amount, category_id, due_day, needs_verification, notes)
+select
+  v.id::uuid, '11111111-1111-1111-1111-111111111111', v.name, v.amount,
+  (select id from public.expense_categories
+   where user_id = '11111111-1111-1111-1111-111111111111' and name = v.category),
+  v.due_day, v.needs_verification, v.notes
+from (values
+  ('77777777-0000-0000-0000-000000000001', 'Spotify', 32.90, 'Suscripciones', null::smallint, false, null),
+  ('77777777-0000-0000-0000-000000000002', 'YouTube', 6.00, 'Suscripciones', null, false, null),
+  ('77777777-0000-0000-0000-000000000003', 'IA', 88.00, 'Suscripciones', null, false, 'Aproximado.'),
+  ('77777777-0000-0000-0000-000000000004', 'Apple', 4.00, 'Suscripciones', null, false, 'Aproximado.'),
+  ('77777777-0000-0000-0000-000000000005', 'Internet', 35.00, 'Vivienda', null, false, 'Aproximado.'),
+  ('77777777-0000-0000-0000-000000000006', 'Comida del gato', 109.00, 'Mascotas', null, false, 'Aproximado.'),
+  ('77777777-0000-0000-0000-000000000007', 'Balón de gas', 7.50, 'Vivienda', null, false, 'Aproximado (prorrateado).'),
+  ('77777777-0000-0000-0000-000000000008', 'Seguro SIP', 15.90, 'Deudas', null, false, null),
+  ('77777777-0000-0000-0000-000000000009', 'Cargo Pacífico', 12.99, 'Otros', null, true, 'Pendiente de verificar si corresponde.')
+) as v(id, name, amount, category, due_day, needs_verification, notes)
+on conflict (id) do nothing;

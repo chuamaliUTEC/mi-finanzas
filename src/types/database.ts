@@ -246,6 +246,44 @@ export interface Transfer {
   deleted_at: string | null
 }
 
+export interface MonthlyBudget {
+  id: string
+  user_id: string
+  year: number
+  month: number
+  notes: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface BudgetCategory {
+  id: string
+  user_id: string
+  budget_id: string
+  category_id: string
+  planned_amount: number
+  is_protected: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface RecurringExpense {
+  id: string
+  user_id: string
+  name: string
+  amount: number
+  currency: string
+  category_id: string | null
+  due_day: number | null
+  is_active: boolean
+  needs_verification: boolean
+  notes: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
 // Mapa nombre-de-tabla → tipo de fila, usado por el hook CRUD genérico.
 export interface TableRows {
   profiles: Profile
@@ -262,6 +300,9 @@ export interface TableRows {
   credit_cards: CreditCard
   debts: Debt
   debt_payments: DebtPayment
+  monthly_budgets: MonthlyBudget
+  budget_categories: BudgetCategory
+  recurring_expenses: RecurringExpense
 }
 
 export type TableName = keyof TableRows
