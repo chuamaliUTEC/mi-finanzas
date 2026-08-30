@@ -11,6 +11,7 @@ import { Cuentas } from '@/pages/Cuentas'
 import { Registrar } from '@/pages/Registrar'
 import { Deudas } from '@/pages/Deudas'
 import { Presupuesto } from '@/pages/Presupuesto'
+import { Inicio } from '@/pages/Inicio'
 
 export default function App() {
   return (
@@ -22,7 +23,7 @@ export default function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AppShell />}>
-            <Route path="/" element={<Section />} />
+            <Route path="/" element={<Inicio />} />
             <Route path="/registrar" element={<Registrar />} />
             <Route path="/cuentas" element={<Cuentas />} />
             <Route path="/deudas" element={<Deudas />} />
