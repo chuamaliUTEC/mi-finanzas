@@ -364,6 +364,79 @@ export interface Asset {
   deleted_at: string | null
 }
 
+export type AlertSeverity = 'info' | 'atencion' | 'riesgo' | 'critico'
+
+export interface FinancialRule {
+  id: string
+  user_id: string
+  name: string
+  description: string | null
+  condition_type: string
+  condition_params: Record<string, unknown>
+  severity: AlertSeverity
+  message_template: string
+  is_system: boolean
+  is_manual: boolean
+  enabled: boolean
+  sort_order: number
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface FinancialAlert {
+  id: string
+  user_id: string
+  rule_id: string | null
+  severity: AlertSeverity
+  title: string
+  message: string
+  dedupe_key: string
+  entity_type: string | null
+  entity_id: string | null
+  status: 'nueva' | 'vista' | 'descartada' | 'resuelta'
+  created_at: string
+  updated_at: string
+}
+
+export interface IfThenPlan {
+  id: string
+  user_id: string
+  trigger_text: string
+  steps: string[]
+  enabled: boolean
+  sort_order: number
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface LearningAdjustment {
+  id: string
+  user_id: string
+  category_id: string | null
+  kind: 'presupuesto' | 'recurrente' | 'meta'
+  observation: string
+  current_value: number | null
+  suggested_value: number | null
+  months_observed: number
+  status: 'pendiente' | 'aceptada' | 'descartada'
+  created_at: string
+  updated_at: string
+}
+
+export interface FinancialEvent {
+  id: string
+  user_id: string
+  kind: string
+  description: string
+  amount: number | null
+  entity_type: string | null
+  entity_id: string | null
+  occurred_at: string
+  created_at: string
+}
+
 // Mapa nombre-de-tabla → tipo de fila, usado por el hook CRUD genérico.
 export interface TableRows {
   profiles: Profile
@@ -388,6 +461,11 @@ export interface TableRows {
   receivables: Receivable
   receivable_payments: ReceivablePayment
   assets: Asset
+  financial_rules: FinancialRule
+  financial_alerts: FinancialAlert
+  if_then_plans: IfThenPlan
+  learning_adjustments: LearningAdjustment
+  financial_events: FinancialEvent
 }
 
 export type TableName = keyof TableRows

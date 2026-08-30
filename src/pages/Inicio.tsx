@@ -1,19 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useTable } from '@/hooks/useTable'
-import { computeAvailableMoney } from '@/algorithms/accounts/balance'
-import { totalActiveDebt } from '@/algorithms/debt/debts'
-import {
-  computeSpendable,
-  monthlyExpectedIncome,
-  upcomingPayments,
-} from '@/algorithms/spendable/spendable'
+import { useFinancialOverview } from '@/hooks/useFinancialOverview'
+import { monthlyExpectedIncome } from '@/algorithms/spendable/spendable'
+import { SEVERITY_ICON } from '@/algorithms/rules/engine'
 import { isInMonth } from '@/algorithms/budget/budget'
 import { useAuth } from '@/hooks/useAuth'
 import { formatCurrency, formatDate } from '@/utils/format'
 
 // Dashboard minimalista (secc. 13-14): una cifra protagonista ("puedes
-// gastar"), y debajo la pregunta que guía a cada sección. Sin saturación.
+// gastar"), lo urgente si lo hay, y la pregunta que guía a cada sección.
 
 const QUESTIONS = [
   { to: '/deudas', icon: '💳', label: '¿Cuánto debo?' },
@@ -25,72 +20,28 @@ const QUESTIONS = [
 
 export function Inicio() {
   const { profile } = useAuth()
-  const accounts = useTable('accounts')
-  const incomes = useTable('income_transactions')
-  const expenses = useTable('expenses')
-  const transfers = useTable('transfers')
-  const debts = useTable('debts')
-  const debtPayments = useTable('debt_payments')
-  const recurring = useTable('recurring_expenses')
-  const cards = useTable('credit_cards')
-  const budgets = useTable('monthly_budgets')
-  const budgetCategories = useTable('budget_categories', { softDelete: false })
-  const sources = useTable('income_sources')
+  const overview = useFinancialOverview()
   const [showBreakdown, setShowBreakdown] = useState(false)
 
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = now.getMonth() + 1
+  const { spendable, tables, year, month } = overview
 
-  const balanceData = useMemo(
-    () => ({ incomes: incomes.rows, expenses: expenses.rows, transfers: transfers.rows }),
-    [incomes.rows, expenses.rows, transfers.rows],
+  const expectedIncomeMonth = tables.sources.rows.reduce(
+    (sum, s) => sum + monthlyExpectedIncome(s),
+    0,
   )
-  const availableMoney = computeAvailableMoney(accounts.rows, balanceData)
-  const totalDebt = totalActiveDebt(debts.rows, debtPayments.rows)
-
-  const currentBudget = budgets.rows.find((b) => b.year === year && b.month === month)
-  const monthBudgetCategories = currentBudget
-    ? budgetCategories.rows.filter((bc) => bc.budget_id === currentBudget.id)
-    : []
-  const monthExpensesRows = useMemo(
-    () => expenses.rows.filter((e) => isInMonth(e.date, year, month)),
-    [expenses.rows, year, month],
-  )
-
-  const spendable = useMemo(
-    () =>
-      computeSpendable({
-        availableMoney,
-        debts: debts.rows,
-        debtPayments: debtPayments.rows,
-        recurring: recurring.rows,
-        budgetCategories: monthBudgetCategories,
-        monthExpenses: monthExpensesRows,
-        today: now,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [availableMoney, debts.rows, debtPayments.rows, recurring.rows, monthBudgetCategories, monthExpensesRows],
-  )
-
-  const upcoming = useMemo(
-    () => upcomingPayments(debts.rows, debtPayments.rows, recurring.rows, cards.rows, now, 31),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [debts.rows, debtPayments.rows, recurring.rows, cards.rows],
-  )
-
-  const expectedIncomeMonth = sources.rows.reduce((sum, s) => sum + monthlyExpectedIncome(s), 0)
-  const realIncomeMonth = incomes.rows
-    .filter((i) => i.deleted_at === null && i.status === 'realizado' && isInMonth(i.date, year, month))
+  const realIncomeMonth = tables.incomes.rows
+    .filter(
+      (i) => i.deleted_at === null && i.status === 'realizado' && isInMonth(i.date, year, month),
+    )
     .reduce((sum, i) => sum + i.amount, 0)
 
-  const totalPlanned = monthBudgetCategories.reduce((s, bc) => s + bc.planned_amount, 0)
-  const totalSpentMonth = monthExpensesRows
+  const totalPlanned = overview.monthBudgetCategories.reduce((s, bc) => s + bc.planned_amount, 0)
+  const totalSpentMonth = overview.monthExpenses
     .filter((e) => e.deleted_at === null && e.status === 'confirmado')
     .reduce((s, e) => s + e.amount, 0)
 
+  const topAlert = overview.alerts[0]
   const greeting = profile?.full_name ? `Hola, ${profile.full_name}` : 'Hola'
-  const loading = accounts.loading || debts.loading
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -107,7 +58,7 @@ export function Inicio() {
             spendable.today < 0 ? 'text-critical' : 'text-ink-900'
           }`}
         >
-          {loading ? '…' : formatCurrency(spendable.today)}
+          {overview.loading ? '…' : formatCurrency(spendable.today)}
         </p>
         <p className="mt-2 text-sm text-ink-500">
           Esta semana: <strong>{formatCurrency(spendable.week)}</strong> · este mes:{' '}
@@ -154,11 +105,30 @@ export function Inicio() {
         )}
       </div>
 
-      {/* 2-5: cifras secundarias, una por tarjeta, sin gráficos */}
+      {/* Lo más urgente, si lo hay */}
+      {topAlert && (
+        <Link
+          to="/decisiones"
+          className="card block border-l-4 border-l-lavender-400 transition-shadow hover:shadow-md"
+        >
+          <p className="text-sm font-medium text-ink-900">
+            {SEVERITY_ICON[topAlert.severity]} {topAlert.title}
+          </p>
+          <p className="mt-1 text-sm text-ink-600">{topAlert.message}</p>
+          <p className="mt-2 text-sm font-medium text-lavender-700">
+            Ver qué hacer
+            {overview.alerts.length > 1 ? ` (+${overview.alerts.length - 1} más)` : ''} →
+          </p>
+        </Link>
+      )}
+
+      {/* Cifras secundarias, una por tarjeta, sin gráficos */}
       <div className="grid gap-4 sm:grid-cols-2">
         <Link to="/deudas" className="card block transition-shadow hover:shadow-md">
           <p className="text-sm font-medium text-ink-500">💳 Deudas</p>
-          <p className="mt-1 text-2xl font-semibold text-ink-900">{formatCurrency(totalDebt)}</p>
+          <p className="mt-1 text-2xl font-semibold text-ink-900">
+            {formatCurrency(overview.totalDebt)}
+          </p>
           <p className="mt-1 text-xs text-ink-400">Total pendiente activo</p>
         </Link>
         <div className="card">
@@ -181,13 +151,13 @@ export function Inicio() {
               : 'sin presupuesto este mes'}
           </p>
         </Link>
-        <div className="card">
+        <Link to="/calendario" className="card block transition-shadow hover:shadow-md">
           <p className="text-sm font-medium text-ink-500">📅 Próximos pagos</p>
-          {upcoming.length === 0 ? (
+          {overview.upcoming.length === 0 ? (
             <p className="mt-2 text-sm text-ink-400">Nada en los próximos 31 días.</p>
           ) : (
             <ul className="mt-2 space-y-1 text-sm">
-              {upcoming.slice(0, 4).map((p, i) => (
+              {overview.upcoming.slice(0, 4).map((p, i) => (
                 <li key={i} className="flex justify-between gap-2">
                   <span className="truncate text-ink-700">
                     {formatDate(p.date)} · {p.label}
@@ -201,7 +171,7 @@ export function Inicio() {
               ))}
             </ul>
           )}
-        </div>
+        </Link>
       </div>
 
       {/* ¿Qué necesitas saber? */}

@@ -14,6 +14,9 @@ import { Presupuesto } from '@/pages/Presupuesto'
 import { Inicio } from '@/pages/Inicio'
 import { Metas } from '@/pages/Metas'
 import { MeDeben } from '@/pages/MeDeben'
+import { Decisiones } from '@/pages/Decisiones'
+import { Reglas } from '@/pages/Reglas'
+import { Calendario } from '@/pages/Calendario'
 
 export default function App() {
   return (
@@ -32,11 +35,11 @@ export default function App() {
             <Route path="/presupuesto" element={<Presupuesto />} />
             <Route path="/metas" element={<Metas />} />
             <Route path="/me-deben" element={<MeDeben />} />
-            <Route path="/decisiones" element={<Section />} />
-            <Route path="/calendario" element={<Section />} />
+            <Route path="/decisiones" element={<Decisiones />} />
+            <Route path="/calendario" element={<Calendario />} />
             <Route path="/pronostico" element={<Section />} />
             <Route path="/reportes" element={<Section />} />
-            <Route path="/reglas" element={<Section />} />
+            <Route path="/reglas" element={<Reglas />} />
             <Route path="/configuracion" element={<Section />} />
             <Route path="/mas" element={<Mas />} />
           </Route>
