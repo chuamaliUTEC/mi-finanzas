@@ -1,59 +1,26 @@
 export interface NavItem {
-  label: string
-  path: string
-  icon: string
-}
-
-export interface NavGroup {
+  to: string
   label: string
   icon: string
-  /** If set, the group itself is a single link (no sub-items shown). */
-  path?: string
-  items?: NavItem[]
+  mobilePrimary?: boolean
 }
 
-/**
- * Navegación reducida a lo esencial: gasto, ingreso, deuda y presupuesto.
- * Las páginas que no aparecen aquí (Departamento, Retiro, Simulador,
- * Inteligencia, Memoria financiera, Documentos, Calendario, Cuentas,
- * Administración, Pronóstico) ya no existen en el código — se borraron por
- * completo, no solo del menú.
- */
-export const NAV_GROUPS: NavGroup[] = [
-  { label: 'Dashboard', icon: '🏠', path: '/' },
-  {
-    label: 'Operación',
-    icon: '💸',
-    items: [
-      { label: 'Ingresos', path: '/ingresos', icon: '💵' },
-      { label: 'Gastos', path: '/gastos', icon: '💸' },
-      { label: 'Gastos recurrentes', path: '/gastos-recurrentes', icon: '🔁' },
-      { label: 'Deudas', path: '/deudas', icon: '💳' },
-      { label: 'Tarjetas', path: '/tarjetas', icon: '💳' },
-      { label: 'Me deben', path: '/me-deben', icon: '💰' },
-    ],
-  },
-  {
-    label: 'Presupuesto y análisis',
-    icon: '📊',
-    items: [
-      { label: 'Análisis', path: '/analisis', icon: '📊' },
-      { label: 'Sobres', path: '/sobres', icon: '✉️' },
-      { label: 'Presupuestos', path: '/presupuestos', icon: '📋' },
-      { label: 'Metas', path: '/metas', icon: '🎯' },
-    ],
-  },
+// Navegación completa (sidebar de escritorio). El subconjunto con
+// mobilePrimary=true es el que se muestra en el bottom nav de mobile
+// (secc. 35): Inicio, Registrar, Deudas, Metas, Más.
+export const NAV_ITEMS: NavItem[] = [
+  { to: '/', label: 'Inicio', icon: '💵', mobilePrimary: true },
+  { to: '/registrar', label: 'Registrar', icon: '➕', mobilePrimary: true },
+  { to: '/cuentas', label: 'Cuentas', icon: '🏦' },
+  { to: '/deudas', label: 'Deudas y tarjetas', icon: '💳', mobilePrimary: true },
+  { to: '/presupuesto', label: 'Presupuesto', icon: '📊' },
+  { to: '/metas', label: 'Metas', icon: '🎯', mobilePrimary: true },
+  { to: '/decisiones', label: '¿Qué debo hacer?', icon: '🧠' },
+  { to: '/calendario', label: 'Calendario', icon: '📅' },
+  { to: '/pronostico', label: 'Pronóstico', icon: '📈' },
+  { to: '/reportes', label: 'Reportes', icon: '🗂️' },
+  { to: '/reglas', label: 'Mis reglas', icon: '📐' },
+  { to: '/configuracion', label: 'Configuración', icon: '⚙️' },
 ]
 
-/** Flat list of every navigable item, used by the mobile "Más" sheet and search. */
-export const ALL_NAV_ITEMS: NavItem[] = NAV_GROUPS.flatMap((group) =>
-  group.path ? [{ label: group.label, path: group.path, icon: group.icon }] : group.items ?? [],
-)
-
-/** Primary shortcuts shown in the mobile bottom nav (max 4 + "Más"). */
-export const MOBILE_PRIMARY_ITEMS: NavItem[] = [
-  { label: 'Inicio', path: '/', icon: '🏠' },
-  { label: 'Gastos', path: '/gastos', icon: '💸' },
-  { label: 'Deudas', path: '/deudas', icon: '💳' },
-  { label: 'Análisis', path: '/analisis', icon: '📊' },
-]
+export const MOBILE_MORE_LABEL = 'Más'

@@ -2,13 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body,
-#root {
-  height: 100%;
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply bg-ink-50 text-ink-900 font-sans;
+  }
 }
 
-body {
-  @apply bg-gray-50 text-gray-900 antialiased;
-  font-family: 'Inter', system-ui, sans-serif;
+@layer components {
+  .card {
+    @apply rounded-2xl bg-white shadow-card border border-ink-100 p-5;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl bg-lavender-600 px-4 py-2.5
+      text-sm font-medium text-white transition-colors hover:bg-lavender-700
+      focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
+      focus-visible:outline-lavender-600 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl border border-ink-200 bg-white
+      px-4 py-2.5 text-sm font-medium text-ink-700 transition-colors hover:bg-ink-50
+      focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
+      focus-visible:outline-lavender-600 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-ink-200 bg-white px-3.5 py-2.5 text-sm text-ink-900
+      placeholder:text-ink-400 focus:border-lavender-500 focus:outline-none focus:ring-2
+      focus:ring-lavender-100;
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-ink-700;
+  }
 }

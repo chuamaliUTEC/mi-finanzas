@@ -6,15 +6,13 @@ export function ProtectedRoute() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center text-gray-500">
+      <div className="flex min-h-screen items-center justify-center text-ink-400">
         Cargando…
       </div>
     )
   }
 
-  if (!session) {
-    return <Navigate to="/login" replace />
-  }
+  if (!session) return <Navigate to="/ingresar" replace />
 
   return <Outlet />
 }
