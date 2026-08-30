@@ -79,12 +79,10 @@ values
   ('44444444-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
    'CTS estimada', 735, '2026-11-15', null),
   ('44444444-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111',
-   'Gratificación estimada', 1990, '2026-12-15', '100% destinada a deuda BCP antes de recibirse.'),
-  ('44444444-0000-0000-0000-000000000003', '11111111-1111-1111-1111-111111111111',
-   'Cobro pendiente Piero', 500, null, null),
-  ('44444444-0000-0000-0000-000000000004', '11111111-1111-1111-1111-111111111111',
-   'Cobro pendiente Leopoldo', 35, null, null)
+   'Gratificación estimada', 1990, '2026-12-15', '100% destinada a deuda BCP antes de recibirse.')
 on conflict (id) do nothing;
+-- Los cobros pendientes (Piero, Leopoldo) viven en el módulo ME DEBEN
+-- (receivables, Fase 5) para no contarse dos veces.
 
 -- La gratificación queda pre-asignada 100% a deuda (el target_id concreto se
 -- enlaza cuando exista la deuda BCP en la Fase 2 del seed, más abajo en este
@@ -167,4 +165,23 @@ from (values
   ('77777777-0000-0000-0000-000000000008', 'Seguro SIP', 15.90, 'Deudas', null, false, null),
   ('77777777-0000-0000-0000-000000000009', 'Cargo Pacífico', 12.99, 'Otros', null, true, 'Pendiente de verificar si corresponde.')
 ) as v(id, name, amount, category, due_day, needs_verification, notes)
+on conflict (id) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- Fase 5: fondo de emergencia, cuentas por cobrar (secc. 19, 31).
+-- ---------------------------------------------------------------------------
+insert into public.savings_goals
+  (id, user_id, name, kind, target_amount, priority, notes)
+values
+  ('88888888-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
+   'Fondo de emergencia', 'fondo_emergencia', 1600, 'alta',
+   'Objetivo inicial ~S/ 1,600; se recalcula según el gasto esencial promedio.')
+on conflict (id) do nothing;
+
+insert into public.receivables (id, user_id, person, original_amount, status)
+values
+  ('99999999-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
+   'Piero', 500, 'pendiente'),
+  ('99999999-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111',
+   'Leopoldo', 35, 'pendiente')
 on conflict (id) do nothing;

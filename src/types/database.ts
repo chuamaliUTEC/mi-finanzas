@@ -284,6 +284,86 @@ export interface RecurringExpense {
   deleted_at: string | null
 }
 
+export interface SavingsGoal {
+  id: string
+  user_id: string
+  name: string
+  kind:
+    | 'fondo_emergencia'
+    | 'eliminar_deuda'
+    | 'viaje'
+    | 'vivienda'
+    | 'inversion'
+    | 'retiro'
+    | 'mudanza'
+    | 'extranjero'
+    | 'otro'
+  target_amount: number
+  currency: string
+  target_date: string | null
+  monthly_contribution: number | null
+  priority: 'baja' | 'media' | 'alta' | 'muy_alta'
+  status: 'activa' | 'pausada' | 'lograda' | 'cancelada'
+  notes: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface SavingsContribution {
+  id: string
+  user_id: string
+  goal_id: string
+  account_id: string | null
+  date: string
+  amount: number
+  notes: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface Receivable {
+  id: string
+  user_id: string
+  person: string
+  original_amount: number
+  currency: string
+  expected_date: string | null
+  status: 'pendiente' | 'parcial' | 'cobrado' | 'incobrable'
+  notes: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface ReceivablePayment {
+  id: string
+  user_id: string
+  receivable_id: string
+  account_id: string | null
+  date: string
+  amount: number
+  notes: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface Asset {
+  id: string
+  user_id: string
+  name: string
+  kind: 'inversion' | 'fondo' | 'bien' | 'otro'
+  value: number
+  currency: string
+  is_verified: boolean
+  notes: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
 // Mapa nombre-de-tabla → tipo de fila, usado por el hook CRUD genérico.
 export interface TableRows {
   profiles: Profile
@@ -303,6 +383,11 @@ export interface TableRows {
   monthly_budgets: MonthlyBudget
   budget_categories: BudgetCategory
   recurring_expenses: RecurringExpense
+  savings_goals: SavingsGoal
+  savings_contributions: SavingsContribution
+  receivables: Receivable
+  receivable_payments: ReceivablePayment
+  assets: Asset
 }
 
 export type TableName = keyof TableRows

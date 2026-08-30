@@ -12,6 +12,8 @@ import { Registrar } from '@/pages/Registrar'
 import { Deudas } from '@/pages/Deudas'
 import { Presupuesto } from '@/pages/Presupuesto'
 import { Inicio } from '@/pages/Inicio'
+import { Metas } from '@/pages/Metas'
+import { MeDeben } from '@/pages/MeDeben'
 
 export default function App() {
   return (
@@ -28,7 +30,8 @@ export default function App() {
             <Route path="/cuentas" element={<Cuentas />} />
             <Route path="/deudas" element={<Deudas />} />
             <Route path="/presupuesto" element={<Presupuesto />} />
-            <Route path="/metas" element={<Section />} />
+            <Route path="/metas" element={<Metas />} />
+            <Route path="/me-deben" element={<MeDeben />} />
             <Route path="/decisiones" element={<Section />} />
             <Route path="/calendario" element={<Section />} />
             <Route path="/pronostico" element={<Section />} />
