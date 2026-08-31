@@ -5,6 +5,7 @@ import { AppShell } from '@/layouts/AppShell'
 import { Login } from '@/pages/auth/Login'
 import { Signup } from '@/pages/auth/Signup'
 import { Onboarding } from '@/pages/Onboarding'
+import { Diagnostico } from '@/pages/Diagnostico'
 import { Mas } from '@/pages/Mas'
 import { Cuentas } from '@/pages/Cuentas'
 import { Ingresos } from '@/pages/Ingresos'
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="/ingresar" element={<Login />} />
         <Route path="/crear-cuenta" element={<Signup />} />
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/diagnostico" element={<Diagnostico />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AppShell />}>

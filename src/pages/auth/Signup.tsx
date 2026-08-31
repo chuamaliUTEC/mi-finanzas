@@ -3,7 +3,26 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { Link as RouterLink } from 'react-router-dom'
 import { useAuth } from '@/hooks/authContext'
+
+/** Convierte el error técnico de Supabase en algo accionable. */
+function explicarError(mensaje: string): string {
+  const m = mensaje.toLowerCase()
+  if (m.includes('database error saving new user') || m.includes('unexpected_failure')) {
+    return 'La base de datos rechazó el registro por un fallo interno al preparar tu cuenta. Falta ejecutar la migración robust_signup en Supabase.'
+  }
+  if (m.includes('already registered') || m.includes('already been registered')) {
+    return 'Este correo ya tiene cuenta. Usa "Ingresar" en vez de registrarte.'
+  }
+  if (m.includes('signups not allowed') || m.includes('signup is disabled')) {
+    return 'El registro está desactivado en el proyecto de Supabase (Authentication → Sign In / Providers).'
+  }
+  if (m.includes('failed to fetch')) {
+    return 'No se pudo contactar con Supabase. Revisa tu conexión y que el proyecto no esté pausado.'
+  }
+  return mensaje
+}
 
 const schema = z.object({
   email: z.string().email('Ingresa un correo válido'),
@@ -29,7 +48,7 @@ export function Signup() {
     setFormError(null)
     const { error } = await signUp(values.email, values.password)
     if (error) {
-      setFormError(error)
+      setFormError(explicarError(error))
       return
     }
     setConfirmationSent(true)
@@ -68,7 +87,17 @@ export function Signup() {
                 <p className="mt-1 text-xs text-critical">{errors.password.message}</p>
               )}
             </div>
-            {formError && <p className="text-sm text-critical">{formError}</p>}
+              {formError && (
+              <div className="rounded-xl border border-critical/30 bg-critical/5 p-3">
+                <p className="text-sm text-critical">{formError}</p>
+                <RouterLink
+                  to="/diagnostico"
+                  className="mt-1 inline-block text-xs font-medium text-lavender-700 underline"
+                >
+                  Ver qué está fallando →
+                </RouterLink>
+              </div>
+            )}
             <button type="submit" className="btn-primary w-full" disabled={isSubmitting}>
               {isSubmitting ? 'Creando cuenta…' : 'Crear cuenta'}
             </button>
