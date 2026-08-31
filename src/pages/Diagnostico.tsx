@@ -51,6 +51,12 @@ function explain(message: string): { detail: string; fix: string } {
       fix: 'Usa al menos 6 caracteres (o los que exija Authentication → Policies).',
     }
   }
+  if (m.includes('email rate limit') || m.includes('over_email_send_rate_limit')) {
+    return {
+      detail: 'Supabase agotó su cuota de correos por hora. Esto solo ocurre cuando la confirmación por correo está ACTIVADA: cada intento de registro dispara un envío.',
+      fix: 'Supabase → Authentication → Sign In / Providers → Email → desactiva "Confirm email". Sin confirmación no se envía correo, el límite deja de aplicar y podrás registrarte y entrar de una vez.',
+    }
+  }
   if (m.includes('failed to fetch') || m.includes('networkerror')) {
     return {
       detail: 'El navegador no logró contactar con Supabase.',
@@ -111,22 +117,27 @@ export function Diagnostico() {
         const { error } = await supabase.from(tabla).select('id').limit(1)
         // Sin sesión, RLS devuelve vacío SIN error: eso significa que la
         // tabla existe y está protegida, que es exactamente lo correcto.
-        const falta =
-          error &&
-          (error.message.includes('does not exist') ||
-            error.message.includes('schema cache') ||
-            error.code === '42P01')
+        // "schema cache" no significa que falte la tabla: la API de Supabase
+        // guarda una copia de la lista de tablas y puede estar desactualizada
+        // tras crear tablas nuevas. Se distingue del caso real de tabla
+        // inexistente para no mandar a repetir una migración ya ejecutada.
+        const cacheDesactualizado = error?.message.includes('schema cache') ?? false
+        const noExiste =
+          (error?.message.includes('does not exist') ?? false) || error?.code === '42P01'
+
         results.push({
           name: `Tabla ${tabla}`,
-          state: falta ? 'fail' : 'ok',
-          detail: falta
+          state: noExiste ? 'fail' : cacheDesactualizado ? 'warn' : 'ok',
+          detail: noExiste
             ? 'No existe: falta correr su migración.'
-            : 'Existe y está protegida por RLS.',
-          fix: falta
-            ? tabla === 'pending_verifications' || tabla === 'spending_ranges'
-              ? 'Ejecuta 20260101000600_verification_states.sql'
-              : 'Ejecuta las migraciones en orden desde supabase/migrations/'
-            : undefined,
+            : cacheDesactualizado
+              ? 'La tabla puede existir, pero la API de Supabase aún no la ve.'
+              : 'Existe y está protegida por RLS.',
+          fix: noExiste
+            ? 'Ejecuta supabase/SETUP_COMPLETO.sql en el SQL Editor.'
+            : cacheDesactualizado
+              ? "Ejecuta en el SQL Editor:  notify pgrst, 'reload schema';  y recarga esta página en 30 segundos."
+              : undefined,
         })
       }
 
@@ -172,6 +183,7 @@ export function Diagnostico() {
   }
 
   const fallos = checks.filter((c) => c.state === 'fail')
+  const avisos = checks.filter((c) => c.state === 'warn')
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl space-y-6 bg-ink-50 px-4 py-8">
@@ -191,11 +203,20 @@ export function Diagnostico() {
           }`}
         >
           <p className="font-medium text-ink-900">
-            {fallos.length === 0
+            {fallos.length === 0 && avisos.length === 0
               ? '✅ La base de datos y la conexión están bien'
-              : `❌ ${fallos.length} ${fallos.length === 1 ? 'problema encontrado' : 'problemas encontrados'}`}
+              : fallos.length > 0
+                ? `❌ ${fallos.length} ${fallos.length === 1 ? 'problema encontrado' : 'problemas encontrados'}`
+                : `⚠️ ${avisos.length} ${avisos.length === 1 ? 'tabla que la API aún no ve' : 'tablas que la API aún no ve'}`}
           </p>
-          {fallos.length === 0 && (
+          {avisos.length > 0 && fallos.length === 0 && (
+            <p className="mt-2 text-sm text-ink-700">
+              Las tablas existen pero la API de Supabase tiene la lista en caché. Ejecuta en el
+              SQL Editor <code className="rounded bg-ink-100 px-1">notify pgrst, 'reload schema';</code>{' '}
+              y recarga esta página.
+            </p>
+          )}
+          {fallos.length === 0 && avisos.length === 0 && (
             <p className="mt-1 text-sm text-ink-600">
               Si aun así no puedes registrarte, usa el botón de abajo: hará un alta real y te dirá
               el error exacto.
