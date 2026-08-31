@@ -194,6 +194,23 @@ export function Diagnostico() {
         </p>
       </div>
 
+      {/* El dato que más confusión evita: a qué proyecto habla esta app.
+          Si no coincide con el que tienes abierto en Supabase, los cambios
+          que hagas allí no afectarán a lo que ves aquí. */}
+      <div className="card border-lavender-200 bg-lavender-50">
+        <p className="text-sm font-medium text-ink-500">Esta aplicación está conectada a:</p>
+        <p className="mt-1 break-all font-mono text-lg font-semibold text-lavender-800">
+          {import.meta.env.VITE_SUPABASE_URL?.replace('https://', '').split('.')[0] ?? '—'}
+        </p>
+        <p className="mt-2 text-sm text-ink-600">
+          Compáralo con el identificador del proyecto que tienes abierto en Supabase (aparece en
+          la barra de direcciones, después de <code className="rounded bg-white px-1">/project/</code>).
+          <strong className="text-ink-900">
+            {' '}Si no son iguales, estás configurando un proyecto y la app usa otro.
+          </strong>
+        </p>
+      </div>
+
       {running && <p className="text-sm text-ink-400">Revisando…</p>}
 
       {!running && (
